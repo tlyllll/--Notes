@@ -81,7 +81,7 @@ int main(){
 
   【.init section】
 
-  【.text section】代码段。通常存放已编译程序的机器代码，一般操作系统加载后，这部分是只读的。不允许修改，但是可以执行
+  【.text section】代码段。通常存放已编译程序的机器代码，一般操作系统加载后，这部分是只读的。不允许修改，但是可以执行.编译后的二进制文件存放在这里。
 
   【.rodata section】只读数据段。此段的数据不可修改，存放程序中会使用的常量。比如程序中的常量字符串 \texttt{"aasdasdaaasdasd"}"aasdasdaaasdasd"。
 
