@@ -1,7 +1,9 @@
-TODO  排序（希尔排序、归并排序、堆排序、选择排序）空间复杂度+时间复杂度
+TODO  排序（希尔排序、归并排序）空间复杂度+时间复杂度
 ## 排序 
+
+### 复杂度
+[排序总结](https://blog.csdn.net/pange1991/article/details/85460755)
 ### 快速排序 O(nlogn)
-平均时间复杂度是 O(nlogn)但最坏情况下的时间复杂度是O(n^2)
 基本思想：
 1. 选中一个元素，将小于它的都放在左边大于它的都放在右边。
 2. 再在他的左边和右边选中一个元素，重复上述操作。
@@ -219,6 +221,34 @@ void bubbleSort(vector<int> &arr){
             }
         }
         if(isSorted) break;
+    }
+}
+```
+
+### 堆排序
+```c++
+//“下沉”
+void downAdjust(vector<int> &arr, int parentIndex, int length){
+    int temp = arr[parentIndex];
+    int childIndex = 2*parentIndex+1;
+    while(childIndex < length){
+        if(childIndex + 1 < length && arr[childIndex+1] > arr[childIndex]) childIndex ++;
+        if(temp >= arr[childIndex]) break;
+        arr[parentIndex] = arr[childIndex];
+        parentIndex = childIndex;
+        childIndex = 2*childIndex + 1;
+    }
+    arr[parentIndex] = temp;
+}
+void heapSort(vector<int> &arr){
+    int len = (int)arr.size();
+    //构建最大堆
+    for(int i = (len-2)/2; i >= 0; i--)
+        downAdjust(arr, i, len);
+    //删除堆顶，移到尾部，调整堆产生新的堆顶
+    for(int i = len-1; i > 0; i--){
+        swap(arr[0], arr[i]);
+        downAdjust(arr, 0, i);
     }
 }
 ```
