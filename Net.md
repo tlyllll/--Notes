@@ -518,3 +518,145 @@ TCP和UDP下socket差异对比图：
 ## 客户端链接合法性
 
 连接认证>>身份认证>>ok你可以玩了
+
+## socket 接口
+
+文件结构
+```
+file{
+  f_type: DTYPE_VNODE || DTYPE_SOCKET // 普通文件｜｜socket对象
+  f_ops: socket类型的驱动
+  f_data: // 具体的socket结构体
+  {
+    so_type: 
+      SOCK_STREAM  // 提供有序的、可靠的、双向的和基于连接的字节流服务，当使用Internet地址族时使用TCP。
+      || SOCK_DGRAM   // 支持无连接的、不可靠的和使用固定大小（通常很小）缓冲区的数据报服务，当使用Internet地址族使用UDP。
+      || SOCK_RAW     // 原始套接字，允许对底层协议如IP或ICMP进行直接访问，可以用于自定义协议的开发
+    ,
+    //每个socket有一个so_pcb，描述了该socket的所有信息
+    //而每个socket有一个编号，这个编号就是socket描述符
+    so_pcb: {
+     inp_laddr, // 当前主机的ip地址
+     inp_lport, // 当前主机进程的端口号
+     inp_faddr, // 发送端主机的ip地址
+     inp_fport  // 发送端主体进程的端口号
+    }
+  }
+
+}
+```
+
+### `socket`实例接口
+```
+  int socket(int protofamily, int so_type, int protocol);
+  
+```
+- protofamily 指协议族
+  - AF_INET，指定so_pcb中的地址要采用ipv4地址类型
+  - AF_INET6，指定so_pcb中的地址要采用ipv6的地址类型
+  - AF_LOCAL/AF_UNIX，指定so_pcb中的地址要使用绝对路径名
+
+- so_type
+  - SOCK_STREAM:对应tcp
+  - SOCK_DGRAM：对应udp
+  - SOCK_RAW：自定义协议或者直接对应ip层
+
+- protocol 指定具体的协议
+  - IPPROTO_TCP，TCP协议
+  - IPPROTO_UDP，UPD协议
+  - 0，如果指定为0，表示由内核根据so_type指定默认的通信协议
+
+### `bind`接口
+```
+  int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+  
+```
+- sockfd 是调用socket()函数创建的socket描述符
+- addr 是具体的地址
+- addrlen 表示addr的长度!
+ 
+![](./img/2022-12-15-14-23-07.png)
+
+### `connect`接口
+
+```
+  int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+  
+```
+
+**三个参数与bind的三个参数含义一致**
+
+**不过**此处strcut sockaddr表示**对端**公开的地址
+
+拿来**建立连接**的函数，只有像**tcp**这样面向连接、提供可靠服务的协议才需要建立连接
+
+### `listen`接口
+```
+int listen(int sockfd, int backlog)
+```
+告知内核在sockfd这个描述符上监听是否有**连接到来**，并设置同时能完成的**最大连接数**为backlog
+
+当调用listen后，内核就会建立两个队列
+- 一个SYN队列，表示接受到请求，但**未完成**三次握手的连接；
+- 另一个是ACCEPT队列，表示**已经完成**了三次握手的队列
+
+- `sockfd` 是调用socket()函数创建的socket描述符
+- `backlog` 已经完成三次握手而等待accept的连接数
+
+### accept接口
+```
+int accept(int listen_sockfd, struct sockaddr *addr, socklen_t *addrlen)
+```
+**三个参数与bind的三个参数含义一致**
+
+**不过**此处的后两个参数是传出参数
+
+accept函数就是从**ACCEPT队列中**拿一个连接，并**生成**一个新的描述符，新的描述符所指向的结构体so_pcb中的请求端ip地址、请求端端口将被初始化。
+
+返回值是一个新的描述符，我们姑且称之为`new_sockfd`
+
+- listen_sockfd所指向的结构体so_pcb中的**请求端ip地址**、**请求端端口**没有被初始化，
+- 而new_sockfd的这两个属性被初始化了。
+
+
+### `listen`、`connect`、`accept`流程及原理
+
+![](./img/2022-12-15-14-47-31.png)
+
+1. 服务器调用listen后生成SYN队列和ACCEPT队列，其中ACCPET队列的长度由backlog指定。
+2. 因为此时ACCEPT队列为空，服务器端在调用accpet之后，将阻塞，等待ACCPT队列有元素。
+3. 客户端在调用connect之后，将开始发起SYN请求，请求与服务器建立连接，此时称为第一次握手。
+4. 服务器端在接受到SYN请求之后，把请求方放入SYN队列中，并给客户端回复一个确认帧ACK，此帧还会携带一个请求与客户端建立连接的请求标志，也就是SYN，这称为第二次握手
+5. 客户端收到SYN+ACK帧后，connect返回，并发送确认建立连接帧ACK给服务器端。这称为第三次握手
+6. 服务器端收到ACK帧后，会把请求方从SYN队列中移出，放至ACCEPT队列中，而accept函数也等到了自己的资源，从阻塞中唤醒，从ACCEPT队列中取出请求方，重新建立一个新的sockfd，并返回。
+
+### `send()`  [TCP]
+send函数只负责将数据提交给协议层。 
+
+send**先比较**待发送数据的**长度len**和**套接字s的发送缓冲区**的长度
+- 如果len**大于**s的发送缓冲区的长度，该函数返回`SOCKET_ERROR`； 
+- 如果len**小于或者等于**s的发送缓冲区的长度，那么send先检查协议**是否正在发送**s的发送缓冲中的数据； 
+  - 如果**是**就等待协议把数据**发送完**
+  - 如果**协议还没有开始**发送s的发送缓冲中的数据**或者**s的发送缓冲中**没有数据**
+    - 那么send就比较s的发送缓冲区的**剩余空间**和**len**； 
+      - 如果len**大于**剩余空间大小，send就一直等待协议把s的发送缓冲中的数据发送完，
+      - 如果len**小于**剩余空间大小
+        - send就仅仅把buf中的数据copy到剩余空间里（注意并不是send把s的发送缓冲中的数据传到连接的另一端的，而是**协议**传的，send仅仅是把buf中的数据copy到s的发送缓冲区的剩余空间里）。 
+        - 如果send函数**copy数据成功**，就**返回**实际copy的**字节数**，
+        - 如果send在**copy数据**时**出现错误**，那么send就返回`SOCKET_ERROR`； 
+        - 如果send在等待**协议传送数据时网络断开**的话，那么send函数也返回`SOCKET_ERROR`。要注意send函数把buf中的数据成功copy到s的发送缓冲的剩余空间里后它就返回了，但是此时这些数据并不一定马上被传到连接的另一端。 
+        - 如果**协议在后续的传送过程中出现网络错误**的话，那么**下一个Socket**函数就会返回`SOCKET_ERROR`。（每一个**除send外**的Socket函数在执行的**最开始总要先等待**套接字的**发送缓冲中的数据被协议传送完毕**才能继续，如果在等待时出现网络错误，那么该Socket函数就返回SOCKET_ERROR）
+
+
+### `recv()`  [TCP]
+
+- recv先**检查**套接字**s的接收缓冲区**
+  - 如果s接收缓冲区中**没有数据**或者协议**正在接收数据**
+    - 那么`recv`就一直**等待**，直到协议把数据**接收完毕**。
+  - 当协议把数据接收完毕，`recv`函数就把s的接收缓冲中的**数据copy到buf中**（注意协议接收到的数据可能**大于**buf的长度，所以在这种情况下要**调用几次**recv函数才能把s的接收缓冲中的数据copy完。**recv函数仅仅是copy数据**，真正的接收数据是协议来完成的）
+  - recv函数**返回**其**实际copy的字节数**。
+  - 如果recv在copy时**出错**，那么它返回`SOCKET_ERROR`；
+  - 如果recv函数在等待协议接收数据时**网络中断**了，那么它返回`0` 。
+  - 对方优雅的关闭socket并不影响本地recv的正常接收数据；
+    - 如果**协议缓冲区**内**没有数据**，recv返回`0`，指示对方关闭；
+    - 如果**协议缓冲区****有数据**，则**返回对应数据**(可能需要多次recv)，在**最后一次recv时，返回0**，指示对方关闭。
