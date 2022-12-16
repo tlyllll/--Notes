@@ -6,12 +6,242 @@
 双向绑定 v-model@
 事件绑定 v-on:click="methods"
 
+
 TODO
 computed: 像data，预处理的data。要加this就能读取到data里的数据
 watch
-props: 从 父组件接受数据
-$emit: 向父组件传送数据
 
+## **组件间通信**
+### 父子组件通信
+- `props`: 从 父组件接受数据
+- `$emit`: 向父组件传送数据
+
+TODO
+除此之外，父组件还可以通过ref来引用和访问子组件。同样的，还可以使用$parent、$children、$root等 API 来分别获取父实例、子实例和根实例。
+
+### 全局事件管理
+### vuex
+![](./img/2022-12-15-20-06-23.png)
+
+1. **State** 数据
+- 读取时最好在computed中
+- Vuex 通过 Vue 的插件系统将 store 实例从根组件中“注入”到所有的子组件里。
+  - 子组件能通过 `this.$store.state` 访问到
+  - 也可以使用`mapState`
+    ``` javascript
+    // 在单独构建的版本中辅助函数为 Vuex.mapState
+    import { mapState } from 'vuex'
+
+    export default {
+      // ...
+      computed: mapState({
+        // 箭头函数可使代码更简练
+        count: state => state.count,
+
+        // 传字符串参数 'count'等同于 `state => state.count`
+        countAlias: 'count',
+
+        // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+        countPlusLocalState(state) {
+          return state.count +  this.localCount
+        }
+      })
+    }
+    ```
+    与局部计算属性混合使用时用对象展开运算符
+    ``` javascript
+        computed: {
+          localComputed () { /* ... */ },
+          // 使用对象展开运算符将此对象混入到外部对象中
+          ...mapState({
+            // ...
+          })
+        }
+    ```
+2. **Getter** 查询数据
+- Getter 接受 `state` 作为其第一个参数，也可以接受其他 `getters` 作为第二个参数
+- Getter 会暴露为 store.getters 对象，你可以以属性的形式访问这些值
+    ```javascript
+    const store = createStore({
+      state: {
+        todos: [
+          { id: 1, text: '...', done: true },
+          { id: 2, text: '...', done: false }
+        ]
+      },
+      getters: {
+        doneTodos (state) {
+          return state.todos.filter(todo => todo.done)
+        }
+      }
+    }) 
+    ```
+- 你也可以通过让 getter 返回一个函数，来实现给 getter 传参。在你对 store 里的数组进行查询时非常有用。
+    ```javascript
+    getters: {
+      // ...
+      getTodoById: (state) => (id) => {
+        return state.todos.find(todo => todo.id === id)
+      }
+    }
+
+    store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
+    ```
+- mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性：
+  ```javascript
+    import { mapGetters } from 'vuex'
+
+    export default {
+    // ...
+    computed: {
+    // 使用对象展开运算符将 getter 混入 computed 对象中
+        ...mapGetters([
+        'anotherGetter',
+        //如果你想将一个 getter 属性另取一个名字
+        doneCount: 'doneTodosCount', 
+        // ...
+        ])
+    }
+    }
+  ```
+3. **Mutations** 改动State的方法
+- 每个 mutation 都有一个字符串的事件类型 (type)和一个回调函数 (handler)。接受 state 作为第一个参数
+- 不能直接调用一个 mutation 处理函数。需要以相应的 type 调用 store.commit 方法
+- 一条重要的原则就是要记住 mutation 必须是**同步函数**。
+- 可以向 store.commit 传入额外的参数，即 mutation 的载荷（**payload**）：
+    ```javascript
+    mutations: {
+    increment (state, n) {
+        state.count += n
+    }
+    }
+
+    store.commit('increment', 10)
+
+    //在大多数情况下，载荷应该是一个对象，这样可以包含多个字段并且记录的 mutation 会更易读：
+
+    mutations: {
+    increment (state, payload) {
+        state.count += payload.amount
+    }
+    }
+
+    store.commit('increment', {
+    amount: 10
+    })
+
+    //另一种方式是直接使用包含 type 属性的对象
+    store.commit({
+    type: 'increment',
+    amount: 10
+    })
+
+    //在组件中提交 Mutation
+    // 1. this.$store.commit('xxx') 提交 mutation
+    // 2.使用 mapMutations 辅助函数将组件中的 methods 映射为 store.commit 调用（需要在根节点注入 store）。
+
+    import { mapMutations } from 'vuex'
+
+    export default {
+    // ...
+    methods: {
+        ...mapMutations([
+        'increment', 
+        // 将 `this.increment()` 映射为 `this.$store.commit('increment')`
+
+        // `mapMutations` 也支持载荷：
+        'incrementBy' 
+        // 将 `this.incrementBy(amount)` 映射为 `this.$store.commit('incrementBy', amount)`
+        ]),
+        ...mapMutations({
+        add: 'increment' 
+        // 将 `this.add()` 映射为 `this.$store.commit('increment')`
+        })
+    }
+    }
+    ```
+4. **Actions** 组件调用Mutations操作数据的动作
+- Action **提交的是 mutation**，而不是直接变更状态。
+- Action 可以包含任意**异步操作**。
+    ```javascript
+    const store = createStore({
+      state: {
+        count: 0
+      },
+      mutations: {
+        increment (state) {
+          state.count++
+        }
+      },
+      actions: {
+        increment (context) {
+          context.commit('increment')
+        }
+      }
+    })
+
+    //实践中，我们会经常用到 ES2015 的参数解构来简化代码（特别是我  们需要调用 commit 很多次的时候）：
+
+    actions: {
+      increment ({ commit }) {
+        commit('increment')
+      }
+    }
+
+    // Action 通过 store.dispatch 方法触发：我们可以在 action   内部执行异步操作
+    actions: {
+      incrementAsync ({ commit }) {
+        setTimeout(() => {
+          commit('increment')
+        }, 1000)
+      }
+    }
+
+    // 以载荷形式分发
+    store.dispatch('incrementAsync', {
+      amount: 10
+    })
+
+    // 以对象形式分发
+    store.dispatch({
+      type: 'incrementAsync',
+      amount: 10
+    })
+
+
+    //组件中
+    import { mapActions } from 'vuex'
+
+    export default {
+      // ...
+      methods: {
+        ...mapActions([
+          'increment', 
+          // 将 `this.increment()` 映射为 `this.$store. dispatch('increment')`
+
+          // `mapActions` 也支持载荷：
+          'incrementBy' 
+          // 将 `this.incrementBy(amount)` 映射为 `this.    $store.dispatch('incrementBy', amount)`
+        ]),
+        ...mapActions({
+          add: 'increment' 
+          // 将 `this.add()` 映射为 `this.$store.dispatch   ('increment')`
+        })
+      }
+    }
+
+    // 假设 getData() 和 getOtherData() 返回的是 Promise
+
+    actions: {
+      async actionA ({ commit }) {
+        commit('gotData', await getData())
+      },
+      async actionB ({ dispatch, commit }) {
+        await dispatch('actionA') // 等待 actionA 完成
+        commit('gotOtherData', await getOtherData())
+      }
+    }
+    ```
 ## 生命周期
 
 TODO
@@ -58,6 +288,7 @@ beforeUnmount
 unmounted
 
 ## 文件目录
+
 ```
 project
 └───src

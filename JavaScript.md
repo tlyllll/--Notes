@@ -44,6 +44,18 @@
 - `==` **值**相等。会先做类型转换，之后再判断值大小
 - `===` **值**和**类型**都相等。
 ## 执行机制
+JavaScript 的执行分为：解释和执行两个阶段
+
+**解释阶段：**
+    - 词法分析
+    - 语法分析
+    - 作用域规则确定
+
+**执行阶段**：
+    - 创建执行上下文
+    - 执行函数代码
+    - 垃圾回收
+
  javascript是一门**单线程**语言，任务分为同步和异步
 
  ![](./img/2022-12-09-15-16-54.png)
@@ -175,6 +187,8 @@ function test() {
 [好文](https://juejin.cn/post/7122071393495154701)
 
 ## this
+**执行上下文**最明显的就是 this 的指向是**执行时**确定的
+
 **全局使用时：**
 - this 总是指称为窗口（在 Node.js 中，全局对象是 global 。）
 - 严格模式中：普通函数中的 this 绑定到 undefined 
@@ -215,4 +229,123 @@ example.apply(null, [1, 2, 3]); //两个参数，第二个是数组
 ### 总结
 this指向优先级
 ![](./img/2022-12-13-13-54-44.png)
+
+## scope作用域
+ES6 之前 JavaScript 没有块级作用域,只有全局作用域和函数作用域
+
+执行上下文在运行时确定，随时可能改变；作用域在定义时就确定，并且不会改变。
+
+
+### **全局作用域和函数作用域**
+在代码中任何地方都能访问到的对象拥有**全局作用域**，一般来说以下几种情形拥有全局作用域：
+- 最外层函数 
+- 在最外层函数外面定义的变量拥有全局作用域
+
+        ```javascript
+        var outVariable = "我是最外层变量"; //最外层变量
+        function outFun() {
+            //最外层函数
+            var inVariable = "内层变量";
+            function innerFun() {
+                //内层函数
+                console.log(inVariable);
+            }
+            innerFun();
+        }
+        console.log(outVariable); //我是最外层变量
+        outFun(); //内层变量
+        console.log(inVariable); //inVariable is not defined
+        innerFun(); //innerFun is not defined
+        ```
+- 所有**末定义直接赋值**的变量**自动声明为拥有全局作用域**
+
+        ```javascript
+        unction outFun2() {
+            variable = "未定义直接赋值的变量";
+            var inVariable2 = "内层变量2";
+        }
+        outFun2(); //要先执行这个函数，否则根本不知道里面是啥
+        console.log(variable); //未定义直接赋值的变量
+        console.log(inVariable2); //inVariable2 is not defined
+        ```
+
+- 所有 window 对象的属性拥有全局作用域
+
+**函数作用域**,是指声明在函数内部的变量，和全局作用域相反，局部作用域一般只在固定的代码片段内可访问到，最常见的例如函数内部。
+
+作用域是分层的，内层作用域可以访问外层作用域的变量，反之则不行。我们看个例子，用泡泡来比喻作用域可能好理解一点：
+![](./img/2022-12-15-16-02-33.png)
+
+块语句（大括号“｛｝”中间的语句不像函数，它们不会创建一个新的作用域。
+- if
+- switch 条件语句
+- for 和 while 循环语句
+
+### 块级作用域
+块级作用域可通过新增命令 `let` 和 `const` 声明
+
+所声明的变量在指定块的**作用域外无法**被访问
+
+**创建：**
+- 在一个函数内部
+- 在一个代码块（由一对花括号`{}`包裹）内部(if/switch)
+
+因为`let` 和 `const`没有变量提升+花括号`{}`内是块级作用域
+
+```javascript
+function getValue(condition) {
+    if (condition) {
+        let value = "blue";
+        return value;
+    } else {
+        // value 在此处不可用
+        return null;
+    }
+    // value 在此处不可用
+}
+```
+
+### 闭包
+能在外部访问到内部信息
+
+
+### 作用域链
+自由变量 = 当前作用域没有定义的变量
+
+作用域链 = 自由变量向上级作用域一层一层寻找的路
+
+```javascript
+var x = 10;
+function fn() {
+    console.log(x);
+}
+function show(f) {
+    var x = 20(function() {
+        f(); //10，而不是20
+    })();
+}
+show(fn);
+```
+在 fn 函数中，取自由变量 x 的值时，要到哪个作用域中取？
+- 要到**创建** fn 函数的那个作用域中取，无论 fn 函数将在哪里调用。
+
+### 延长作用域
+**1. try...catch**
+
+对 catch 语句来说，会创建一个新的变量对象，其中包含的是被抛出的错误对象的声明。
+
+**2. with**
+
+对 with 语句来说，会将指定的对象添加到作用域链中。
+
+```javascript
+function buildUrl() {
+    var qs = "?debug=true"; 
+    with(location){
+        var url = href + qs;
+        //这里的href可以在location里查找
+    }
+    return url;
+}
+```
 
