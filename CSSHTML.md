@@ -1,5 +1,18 @@
 
 # CSS
+## 单位
+### 绝对长度单位
+- px	像素	屏幕
+- pt	点	打印、UI稿
+### 相对长度单位
+- em	font-size：相对父元素 width 等：相对于自身的 font-size	自适应布局
+- rem	相对于根元素的字体大小	移动端
+- vw	视窗宽度1%	
+- vh	视窗高度1%	高度自适应
+
+### 百分比 % 相对于谁
+百分比总是相对于**父元素**，无论是设置 `font-size` 或 `width` 等。如果父元素的相应属性，经浏览器计算后，仍无绝对值，那么 % 的实际效果等同于 默认值，如 height: 100%
+
 ## 预处理器
 不需要考虑浏览器兼容问题，因为 CSS 预处理器最终编译和输出的仍是标准的 CSS 样式。
 
@@ -7,6 +20,8 @@
 
 关于 CSS 预处理器：sass、less、stylus
 ## 选择器
+>ID > 类 > 类型（标签） > 相邻 > 子代 > 后代 > 通配符 > 属性 > 伪类
+
 - id 选择器（#myid）
 
 - 类选择器（.myclass）
@@ -41,6 +56,87 @@
 !important >行内样式> ID 选择器「如：#header」> 类选择器「如：.foo」> 标签选择器「如：h1」 > 通配符选择器（*）
 
 ## 布局
+### 弹性布局
+```css
+.box{
+  display: flex | inline-flex;
+}
+```
+设为 Flex 布局以后，子元素的float、clear和vertical-align属性将失效。
+![](2022-12-16-15-34-45.png)
+采用 Flex 布局的元素，称为 **Flex 容器（flex container）**，简称"容器"。它的所有子元素自动成为容器成员，称为 **Flex 项目（flex item）**，简称"项目"。
+
+容器默认存在两根轴：**水平的主轴（main axis）**和**垂直的交叉轴（cross axis）**。
+- 主轴的开始位置（与边框的交叉点）叫做main start，结束位置叫做main end；
+- 交叉轴的开始位置叫做cross start，结束位置叫做cross end。
+
+项目默认沿主轴排列。单个项目占据的主轴空间叫做main size，占据的交叉轴空间叫做cross size。
+#### **容器的属性**
+```css
+.box{
+  display: flex | inline-flex;
+  flex-direction: row[从左往右] | row-reverse[从右往左] | 
+                  column[从上往下] | column-reverse[从下往上]; 
+  /* 如果一条轴线排不下，如何换行。 */
+  flex-wrap: nowrap[默认]不换行 
+            | wrap 换行，第一行在上方。 
+            | wrap-reverse 换行，第一行在下方。
+  /* flex-flow属性是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap。 */
+  flex-flow:  <flex-direction> || <flex-wrap>;
+  /* justify-content属性定义了item在主轴上的对齐方式 */
+  justify-content: flex-start [默认] 左对齐| flex-end 右对齐| center 居中|
+                  | space-between 两端对齐，项目之间的间隔都相等。
+                  | space-around; 每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍。
+  /* align-items属性定义项目在交叉轴上如何对齐。 */
+  align-items: flex-start 交叉轴的起点对齐
+              | flex-end 交叉轴的终点对齐。
+              | center 交叉轴的中点对齐。
+              | baseline 项目的第一行文字的基线对齐。
+              | stretch 如果项目未设置高度或设为auto，将占满整个容器的高度。;
+  /* align-content属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。 */
+  align-content: flex-start 与交叉轴的起点对齐。
+                | flex-end 与交叉轴的终点对齐。
+                | center 与交叉轴的中点对齐 
+                | space-between ：与交叉轴两端对齐，轴线之间的间隔平均分布。
+                | space-around 每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍 
+                | stretch（默认值）：轴线占满整个交叉轴。;
+}
+```
+`justify-content`
+![](./img/2022-12-16-16-15-08.png)
+
+`align-items`
+![](./img/2022-12-16-16-18-43.png)
+
+`align-content`
+![](./img/2022-12-16-16-19-05.png)
+#### **item的属性**
+```css
+.item {
+  /* default 0 排列顺序。数值越小，排列越靠前*/
+  order: <integer>;
+
+  /* 定义项目的放大比例默认为0，即如果存在剩余空间，也不放大。*/
+  flex-grow: <number>; 
+  
+  /* 属性定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。 如果一个项目的flex-shrink属性为0，其他项目都为1，则空间不足时，前者不缩小。*/
+  flex-shrink: <number>; 
+
+  /* flex-basis属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。 */
+  /* 它可以设为跟width或height属性一样的值（比如350px），则项目将占据固定空间。 */
+  flex-basis: <length> | auto; /* default auto */
+
+  /*  flex属性flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选。 */
+  flex: none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]
+  /* 该属性有两个快捷值：auto (1 1 auto) 和 none (0 0 auto)。 */
+
+  /* align-self属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。 */
+   align-self: auto | flex-start | flex-end | center | baseline | stretch;
+}
+```
+`align-self`
+![](./img/2022-12-16-16-24-25.png)
+
 ### display
 - block [h1~h6、hr、p、pre、ul、ol、dl、table、div、form]
   - 设置宽高✅ 独占一行✅

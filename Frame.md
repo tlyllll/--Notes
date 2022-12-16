@@ -13,12 +13,154 @@ watch
 
 ## **组件间通信**
 ### 父子组件通信
+**1. props/$emit**
 - `props`: 从 父组件接受数据
 - `$emit`: 向父组件传送数据
 
-TODO
-除此之外，父组件还可以通过ref来引用和访问子组件。同样的，还可以使用$parent、$children、$root等 API 来分别获取父实例、子实例和根实例。
+```javascript
+// Father.vue -->
+  <Child :FatherMsg="data"  @ListenChild="ListenChild"></Child>
+//
+import Child from './Child';
+export default {
+    data() {
+        return {
+            data: 'I am your father',
+            ChildMsg: '',
+        }
+    },
+    components: {
+        Child
+    },
+    methods: {
+        ListenChild(data) {
+            console.log("子组件传递过来的值：" , data);
+            this.ChildMsg = data;
+        }
+    }
+}
+//
+```
+```javascript
+// Child.vue -->
+ <button @click="send">子组件将值传递给父组件</button>
+export default {
+    data() {
+        return {
+            data: 'I am your children',
+        }
+    },
+    props: ['FatherMsg'],
+    methods: {
+      send() {
+        this.$emit('ListenChild', this.data);
+      }
+    }
+}
 
+```
+
+**2. ref**
+父组件调用子组件中的事件方法
+```javascript
+// Child.vue -->
+export default {
+    methods: {
+    childFun() {
+      console.log('我是子组件的方法 childFun');
+      this.msg = '我的方法被调用了'
+    },
+  },
+}
+
+```
+```javascript
+// Father.vue -->
+    <Child ref="child" />
+//
+import Child from './Child';
+export default {
+    components: {
+        Child
+    },
+    methods: {
+        handleClick() {
+            this.$refs.child.childFun();
+        },
+    },
+
+}
+//
+```
+除此之外，父组件还可以通过ref来引用和访问子组件。同样的，还可以使用$parent、$children、$root等 API 来分别获取父实例、子实例和根实例。
+**3. $parent / $child**
+
+this.$children 是一个数组类型，它包含所有子组件对象。父访问子
+
+this.$parent 子访问父
+### 祖孙$attrs/ $listeners
+`$attrs`
+1. 包含了父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外);
+2. 当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind=“$attrs” 传入内部组件。通常配合 interitAttrs 选项一起使用。
+`$listeners`
+1. 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。
+2. 它可以通过 v-on=“$listeners” 传入内部组件。
+简单来说：`$attrs` 与`$listeners`是两个对象，`$attrs `里存放的是父组件中绑定的非 Props 属性，`$listeners` 里存放的是父组件中绑定的非原生事件
+
+```javascript
+    //爷组件
+    <div id="app">
+      <Home :msg="msg"></Home>
+    </div>
+    //父组件(父组件的操作最简单，但不做就会传不过去)
+
+    <div class="home">
+      <Sun v-bind="$attrs"></Sun>
+    </div>
+    //孙组件
+
+    <div class="sun">
+      {{ msg }}
+    </div>
+    //props直接接受 
+    props:{ msg:String, }
+
+//
+```
+```javascript
+    //爷组件
+    <div id="app">
+      <Home @setVal="setVal">></Home>
+    </div>
+    methods:{ setVal(val){ this.msg = val; } }
+    //父组件(父组件的操作最简单，但不做就会传不过去)
+
+    <div class="home">
+      <Sun v-on="$listeners"></Sun>
+    </div>
+
+    //孙组件
+    <div class="sun">
+      <button @click="toVal">点我</button>
+    </div>
+    methods:{ toVal(){ this.$emit("setVal",this.msg) } }
+```
+### 兄弟组件
+通过eventBus来做中间的桥梁，传输方通过中间组件调用 emit 传数据，接收方通过on 接受数据，两者之间的自定义属性名保持一致。
+```javascript
+// 传输方组件调用方式
+import Bus from '@/EventBus.js'
+Bus.$emit('pass-value', this.say);
+
+// 接收方接受参数
+import Bus from '@/EventBus.js'
+
+created() {
+  Bus.$on('pass-value', val => {
+     this.sibilingValue = val;
+  })
+}
+```
 ### 全局事件管理
 ### vuex
 ![](./img/2022-12-15-20-06-23.png)
