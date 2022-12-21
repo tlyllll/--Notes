@@ -10,7 +10,21 @@
 TODO
 computed: 像data，预处理的data。要加this就能读取到data里的数据
 watch
+## MVVM
+![](./img/2022-12-19-18-12-11.png)
+是一个软件架构设计模式
+Model-View-ViewModel的简写，是M-V-VM三部分组成.
 
+它本质上是MVC的改进版本
+
+能够实现**前端开发**和**后端业务逻辑的分离**，
+- model指数据模型，负责后端业务逻辑处理，
+- view指视图层，负责前端整个用户界面的实现，
+- viewModel则负责**view层和model层的交互**
+
+关注model的变化，让MVVM框架利用自己的机制**自动更新DOM**，也就是所谓的**数据-视图分离**，数据不会影响视图。
+
+![](./img/2022-12-19-18-18-25.png)
 ## **组件间通信**
 ### 父子组件通信
 **1. props/$emit**
@@ -385,42 +399,49 @@ created() {
     }
     ```
 ## 生命周期
-
+![](./img/2022-12-17-11-05-07.png)
 TODO
 
 **组件生命周期**
 **Vue2.x：**
-beforeCreate
-created
-beforeMount
-mounted
-beforeUpdate
-updated
-beforeDestroy
-destroyed
-activated
-deactivated
-errorCaptured
+- beforeCreate: 在组件实例初始化完成之后立即调用。实例初始化完成、props 解析之后、data() 和 computed 等选项处理之前
+- created: 响应式数据、计算属性、方法和侦听器设置完成。挂载阶段还未开始，因此 `$el` 属性仍不可用
+- beforeMount: 组件已经完成了其响应式状态的设置, 但还**没有创建 DOM 节点**
+- mounted: 在组件被挂载之后调用。
+  - 其自身的**DOM 树已经创建完成**并插入了父容器中。注意仅当根容器在文档中时，才可以保证组件 DOM 树也在文档中。
+  - 所有同步子组件都已经被挂载。(不包含异步组件或 <Suspense> 树内的组件)
+- beforeUpdate: 在组件即将因为一个**响应式状态变更**而**更新其 DOM 树****之前调用**。
+- updated: 这个钩子会在组件的任意 DOM 更新后被调用，这些更新可能是由不同的状态变更导致的。
+- beforeUnmount: 在一个组件实例被卸载之前调用。
+- unmounted: 在一个组件实例被卸载之后调用。
+- activated: 若组件实例是 <KeepAlive> 缓存树的一部分，当组件被插入到 DOM 中时调用。
+- deactivated: 若组件实例是 <KeepAlive> 缓存树的一部分，当组件从 DOM 中被移除时调用。
+- errorCaptured: 在捕获了后代组件传递的错误时调用。
+
 **Vue3.x：**
-setup
-onBeforeMount
-onMounted
-onBeforeUpdate
-onUpdate
-onBeforeUnmout
-onUnmounted
-onActivated
-onDeactivated
-onErrorCaptured
-onRenderTriggered
-onRenderTracked
+- setup
+- onBeforeMount
+- onMounted
+- onBeforeUpdate
+- onUpdate
+- onBeforeUnmout
+- onUnmounted
+- onActivated
+- onDeactivated
+- onErrorCaptured
+- onRenderTriggered: 在一个响应式依赖被组件触发了重新渲染之后调用。这个钩子仅在开发模式下可用，且在服务器端渲染期间不会被调用。
+- onRenderTracked
+
+
 **指令生命周期**
+
 **Vue2.x：**
 bind
 inserted
 update
 componentUpdated
 unbind
+
 **Vue3.x：**
 beforeMount
 mounted

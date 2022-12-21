@@ -1,4 +1,19 @@
 # js
+## 原型链
+![](./img/2022-12-17-11-28-33.png)
+1. js分为**函数对象**和**普通对象**，每个对象都有`__proto__`属性，但是只有函数对象才有`prototype`属性
+2. Object、Function都是js内置的函数, 类似的还有我们常用到的Array、RegExp、Date、Boolean、Number、String
+
+- 属性__proto__是一个对象, 它有两个属性，constructor和__proto__
+```javascript
+{
+    __proto__:{
+        constructor,
+        __proto__
+    }
+}
+```
+- 原型对象prototype有一个默认的constructor属性，用于记录实例是由哪个构造函数创建；
 ## 基本数据类型
 - String
 - Number
@@ -204,6 +219,20 @@ function test() {
 - 在函数中/单独 ->全局对象
 - 在对象中的函数中 ->对象
 - this 指的是当前正在执行该函数的对象
+### 普通函数和箭头函数
+最大的区别在于 this 的指向问题：
+- 箭头函数没有自己的 this
+
+- 箭头函数**不能用 new**来创建构造函数的实例，普通函数可以（
+  - 因为箭头函数创建的时候程序不会为它创建 construct 方法，也就是没有构造能力，用完就丢掉了，
+  - 不像普通函数重复利用，因此也不需要构造函数原型，也就是不会自动生成 prototype 属性）
+
+- 程序**不会**给箭头函数**创建 arguments 对象**
+
+- 箭头函数中的 this 指向的是**紧紧包裹箭头函数的那个对象**（**定义时**决定的）。
+  - 普通函数中的 this 是动态的，
+
+- 箭头函数不能通过 bind、call、apply 来改变 this 的值，但依然可以调用这几个方法（只是 this 的值不受这几个方法控制）
 
 ### call()/apply()/bind()
 - 第一个参数都是 this 要指向的对象
@@ -349,3 +378,98 @@ function buildUrl() {
 }
 ```
 
+## 防抖
+- 只执行最后一次。防抖是规定时间内发生抖动时不执行后续操作。
+- 函数防抖就是法师发技能的时候要读条，技能读条没完再按技能就会重新读条。
+```javascript
+function myDebounce(fn,wait = 1000){
+    //创建一个标记 用来放定时器的返回值
+    let timeout = null;
+    return function(){
+        // 每当用户输入的时候把钱一个setTimeout clear掉
+        clearTimeout(timeout);
+        timeout = setTimeout(()=>{
+            // 然后又创建一个新的setTimeout
+            // 这样就能保证输入字符后的interval间隔内如果还有字符输入的话
+            // 就不会执行fn
+            fn.apply(this, arguments);
+        }, 500);
+    }
+}
+```
+## 节流
+- 控制执行次数。
+  - e.g. 滚动条拉到合适的位置了，过 5ms，再进行改变。
+- 函数节流就是fps游戏的射速，就算一直按着鼠标射击，也只会在规定射速内射出子弹。
+
+```javascript
+function throttle(fn,delay){
+    //创建一个标记 用来放定时器的返回值
+    let timer = null;
+    return function(){
+        if(!timer) {
+            timer = setTimeout(()=>{
+                fn.apply(this, arguments);
+                timer = null;
+            }, delay);
+        }
+    }
+}
+```
+
+## 数组操作
+
+### for
+1. for..of(ES6):
+   - 循环用来**遍历数组**
+   - 允许遍历获得**键值**
+   - 只遍历当前对象 ；
+   - 返回数组下标对应的属性值
+   - 对于普通对象，没有部署原生的 `iterator` 接口，直接使用 for...of 会报错
+     - 只要有 iterator 接口的数据结构,都可以使用 for of循环。
+       - 数组 Array
+       - Map
+       - Set
+       - String
+       - arguments对象
+       - Nodelist对象, 就是获取的dom列表集合
+
+1. for..in(ES5):
+   - 适用于**遍历对象**而产生的，不适用于遍历数组。
+   - 只能获得对象的**键名**，不能获得键值
+   - 会遍历整个对象的原型链；
+   - 返回数组中所有可枚举的属性名；
+
+2. forEach
+   - 无法中途跳出，`break` 命令或 `return` 命令都不能奏效
+
+### 常见操作
+
+|  方法   | 参数/使用 [可选] | 作用  |
+|  ----  | ----  | ----  |
+| `shift`  | - |**删除**原数组**第一项**，并**返回**删除元素的**值**；如果数组为空则返回 `undefined` |
+| `unshift`  | (`要添加的东西`) |将**参数添加**到原数组**开头**，并返回**数组的长度** |
+| `pop`  | - |**删除**原数组**最后一项**，并**返回**删除元素的**值**；如果数组为空则返回 undefined|
+| `push`  | (`要添加的东西`) |将**参数添加**到原数组**末尾**，并返回数组的**长度** |
+| `concat`  | `c = a.concat(b);` | 合并两个数组，如果是使用ES6语法也可以用扩展运算符 `…` 来代替 |
+| `splice`  | (`start,[deleteCount],[val1,val2,…]`) |从**start位置**开始**删除deleteCount项**，并从**该位置起插入**。**原数组改变** |
+| `reverse`  | - |将数组反序 |
+| `sort`  | (`function`) |按指定的参数对数组进行**排序** |
+| `join`  | (`separator`) |将**数组**的元素**组起一个字符串**，以 **separator 为分隔符**，省略的话则用**默认用逗号**为分隔符 |
+| `slice`  | (`start,[end]`) |规定从何处开始选取，该参数为负数，则表示从原数组中的倒数第几个元素开始提取.[start,end) **原数组不改变** |
+| `map()`  | 实例如下 | map 作用是映射调用此方法的数组。按照原始数组元素顺序依次处理元素。不会改变原始数组，返回新数组，长度和原始数组一致 |
+``` javascript
+Array.map((item,index,arr)=>{
+ //item => 数组的每一项
+ //index => 数组每一项的索引
+ //arr => 原数组
+})
+实例：
+let arr = [1,2,3]
+let newArr = arr.map((item,index,arr)=>{
+         return item+1
+})
+//newArr = [2,3,4]
+```
+
+## 字符串
