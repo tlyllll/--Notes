@@ -1,16 +1,15 @@
 # vue
 是js框架
 
+TODO
+computed: 像data，预处理的data。要加this就能读取到data里的数据
+watch
 ## 绑定
 单向绑定 v-bind:
 双向绑定 v-model@
 事件绑定 v-on:click="methods"
-
-
-TODO
-computed: 像data，预处理的data。要加this就能读取到data里的数据
-watch
-## MVVM
+## 双向绑定实现
+### MVVM
 ![](./img/2022-12-19-18-12-11.png)
 是一个软件架构设计模式
 Model-View-ViewModel的简写，是M-V-VM三部分组成.
@@ -25,6 +24,112 @@ Model-View-ViewModel的简写，是M-V-VM三部分组成.
 关注model的变化，让MVVM框架利用自己的机制**自动更新DOM**，也就是所谓的**数据-视图分离**，数据不会影响视图。
 
 ![](./img/2022-12-19-18-18-25.png)
+### 实现mvvm的双向绑定
+![](./img/2022-12-22-11-30-54.png)
+- 数据监听器Observer，能够对数据对象的所有**属性进行监听**，如有变动可拿到最新值并**通知订阅者**
+- 指令解析器Compile，对每个**元素节点**的指令进行扫描和解析，根据指令模板**替换数据**，以及绑定相应的更新函数
+- Watcher，作为连接Observer和Compile的桥梁，能够订阅并收到每个属性变动的通知，执行指令绑定的相应回调函数，从而更新视图
+- mvvm入口函数，整合以上三者
+![](./img/2022-12-22-12-10-59.png)
+
+### 原理概述
+常见的基于数据劫持的双向绑定有两种实现
+1. 一个是目前Vue在用的 `Object.defineProperty`
+2. 一个是ES2015中新增的 `Proxy`，而在**Vue3.0版本**后加入Proxy从而代替Object.defineProperty
+
+数据劫持: vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过Object.defineProperty() 来劫持各个属性的 `setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调。
+### observer.js
+```javascript
+	/**
+	 * 把一个对象的每一项都转化成可观测对象
+	 * @param { Object } obj 对象
+	 */
+	function observable (obj) {
+		if (!obj || typeof obj !== 'object') {
+        	return;
+    	}
+		let keys = Object.keys(obj);
+		keys.forEach((key) =>{
+			defineReactive(obj,key,obj[key])
+		})
+		return obj;
+	}
+	/**
+	 * 使一个对象转化成可观测对象
+	 * @param { Object } obj 对象
+	 * @param { String } key 对象的key
+	 * @param { Any } val 对象的某个key的值
+	 */
+	function defineReactive (obj,key,val) {
+		let dep = new Dep();
+		Object.defineProperty(obj, key, {
+			get(){
+				dep.depend();
+				console.log(`${key}属性被读取了`);
+				return val;
+			},
+			set(newVal){
+				val = newVal;
+				console.log(`${key}属性被修改了`);
+				dep.notify()                    //数据变化通知所有订阅者
+			}
+		})
+	}
+	class Dep {
+		
+		constructor(){
+			this.subs = []
+		}
+		//增加订阅者
+		addSub(sub){
+			this.subs.push(sub);
+		}
+        //判断是否增加订阅者
+		depend () {
+		    if (Dep.target) {
+		     	this.addSub(Dep.target)
+		    }
+		}
+
+		//通知订阅者更新
+		notify(){
+			this.subs.forEach((sub) =>{
+				sub.update()
+			})
+		}
+		
+	}
+	Dep.target = null;
+
+```
+### watcher.js
+```javascript
+	class Watcher {
+		constructor(vm,exp,cb){
+		    this.vm = vm;
+		    this.exp = exp;
+		    this.cb = cb;
+		    this.value = this.get();  // 将自己添加到订阅器的操作
+		}
+		get(){
+			Dep.target = this;  // 缓存自己
+        	let value = this.vm.data[this.exp]  // 强制执行监听器里的get函数
+        	Dep.target = null;  // 释放自己
+        	return value;
+		}
+		update(){
+			let value = this.vm.data[this.exp];
+        	let oldVal = this.value;
+        	if (value !== oldVal) {
+                this.value = value;
+                this.cb.call(this.vm, value, oldVal);
+			}
+	}
+}
+
+```
+
+[Vue双向绑定原理及实现](https://www.cnblogs.com/wangjiachen666/p/9883916.html)
 ## **组件间通信**
 ### 父子组件通信
 **1. props/$emit**

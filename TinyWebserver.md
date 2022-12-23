@@ -152,3 +152,244 @@ bool signal()
     return pthread_cond_signal(&m_cond)==0;
 }
 ```
+
+# 半同步半反应堆线程池
+## 服务器编程基本框架
+![](./img/2022-12-21-14-23-10.png)
+
+主要由**I/O单元**，**逻辑单元**和**网络存储单元**组成
+- I/O单元: 处理**客户端连接**，**读写网络数据**；
+- 逻辑单元: 处理**业务逻辑**的线程；
+- 网络存储单元: 指本地**数据库和文件**等。
+
+其中每个单元之间通过**请求队列**进行**通信**，从而**协同完成任务**。
+
+## 五种I/O模型
+- 阻塞IO:调用者调用了某个函数，**等待**这个函数返回，**期间什么也不做**，不停的去检查这个函数有没有返回，必须等这个函数返回才能进行下一步动作
+- 非阻塞IO:非阻塞等待，**每隔一段时间就去检测**IO事件是否就绪。**没有就绪就可以做其他事**。
+  - 非阻塞I/O执行系统调用总是**立即返回**，不管事件是否已经发生，
+  - 若事件没有发生，则返回-1，此时可以根据errno区分这两种情况，
+    - 对于accept，recv和send，事件未发生时，errno通常被设置成eagain 
+- 信号驱动IO:linux用**套接口**进行信号驱动IO，安装一个**信号处理函数**，进程继续运行并不阻塞，当IO时间**就绪**，进程**收到SIGIO信号**。然后处理IO事件。
+- IO复用:linux用`select/poll`函数实现IO复用模型，这两个函数也会使进程阻塞，但是和阻塞IO所不同的是这两个函数可以**同时阻塞多个IO操作**。而且可以**同时对多个读操作、写操作的IO函数进行检测**。知道有**数据可读或可写时**，才真正**调用IO操作函数**
+- 异步IO:linux中，可以调用`aio_read`函数告诉内核描述字**缓冲区指针**和**缓冲区的大小、文件偏移及通知的方式**，然后立即返回，当内核将数据拷贝到缓冲区后，再通知应用程序。
+
+> 阻塞I/O，非阻塞I/O，信号驱动I/O和I/O复用都是同步I/O。
+> 
+> 同步I/O指内核向应用程序通知的是**就绪事件**，比如只通知有客户端连接，要求用户代码自行执行I/O操作
+> 
+> 异步I/O是指内核向应用程序通知的是**完成事件**，比如读取客户端的数据后才通知应用程序，由内核完成I/O操作。
+>
+## 事件处理模式
+- reactor模式中，
+  - 主线程(I/O处理单元)只负责**监听文件描述符**上是否**有事件发生**
+    - 有的话立即通知**工作线程**(逻辑单元 )，读写数据、接受新连接及处理客户请求均在工作线程中完成。
+    - 通常由**同步**I/O实现。
+
+- proactor模式中，
+  - **主线程**和**内核**负责处理**读写**数据、**接受新连接**等I/O操作，
+  - **工作线程**仅负责**业务逻辑**，如**处理客户请求**。
+  - 通常由**异步**I/O实现。
+
+## 同步I/O模拟proactor模式
+
+异步I/O并不成熟，实际中使用较少，这里将使用同步I/O模拟实现proactor模式
+
+epoll_wait为例 工作流程：
+- **主线程**往epoll内核事件表**注册**socket上的**读就绪事件**。 epoll.内核事件表.注册socket().read() 
+  - **主线程**调用epoll_wait**等待**socket上**有数据可读**    epoll_wait -> 等socket.read()有数据可读
+  - 当socket上有数据可读，epoll_wait**通知主线程**,           epoll_wait -> 通知主线程
+  - 主线程从socket循环读取数据，**直到没有**更多数据可读，        主线程 -> socket.read()--> 直到没数据可读
+  - 然后将读取到的数据**封装成一个请求对象**并插入**请求队列**。   请求队列.insert(所有读到的数据的封装)
+
+- 睡眠在请求队列上某个**工作线程被唤醒**，它**获得**请求对象**并处理**客户请求，然后往epoll**内核事件表**中**注册该socket**上的写就绪事件   
+  - 工作线程 in 请求队列
+  - 工作线程唤醒
+  - 工作线程 get(请求对象) -> 处理(客户请求)
+
+- 然后往epoll**内核事件表**中**注册该socket**上的写就绪事件     epoll.内核事件表.注册socket().write()
+  - 主线程调用epoll_wait等待socket可写。                     epoll_wait -> 等socket.write()有数据可写
+  - 当socket上有数据可写， epoll_wait通知主线程。             epoll_wait -> 通知主线程
+  - 主线程往socket上写入服务器处理客户请求的结果。              主线程 -> socket.write()--> 服务器处理请求的结果
+
+## 并发编程模式
+实现有**多线程**和**多进程**两种，但这里涉及的并发模式指**I/O处理单元与逻辑单元**的**协同完成任务**的方法。
+### 半同步/半异步模式
+半同步/半反应堆并发模式是半同步/半异步的变体，将半异步**具体化**为某种事件处理模式.
+
+**并发模式**中的同步和异步：
+- 同步指的是程序完全按照代码序列的**顺序执行**
+- 异步指的是程序的执行需要由**系统事件驱动**
+
+半同步/**半异步**模式**工作流程**：
+- **同步线程**用于处理**客户逻辑**
+- **异步线程**用于处理**I/O事件**
+- **异步线程**监听到**客户请求**后，就将其**封装成请求对象**并插入请求队列中 
+  - listen() -> 请求队列.insert(封装请求对象)
+- **请求队列**将**通知**某个**工作在同步模式的工作线程**来读取并**处理**该请求对象
+
+半同步/**半反应堆**模式**工作流程**：
+- **主线程**充当**异步线程**，负责**监听**所有socket上的事件
+  - 若有新请求到来，主线程接收之以得到新的连接socket，然后往**epoll内核事件表**中**注册该socket上的读写事件**
+  - 如果连接socket上有**读写事件发生**，主线程从socket上接收数据，并将数据封装成请求对象**插入到请求队列**中
+- 所有**工作线程**睡眠在**请求队列**上，当有任务到来时，通过**竞争（如互斥锁）获得任务**的接管权
+
+### 领导者/追随者模式
+
+## 线程池
+空间换时间,浪费服务器的硬件资源,换取运行效率.
+
+池是一组资源的集合,这组资源在服务器启动之初就被完全创建好并初始化,这称为静态资源.
+
+当服务器进入正式运行阶段,开始处理客户请求的时候,如果它需要相关的资源,可以直接从池中获取,无需动态分配.
+
+当服务器处理完一个客户连接后,可以把相关的资源放回池中,无需执行系统调用释放资源.
+
+```c++
+//线程池类定义
+template<typename T>
+class threadpool{
+    public:
+        //thread_number是线程池中线程的数量
+        //max_requests是请求队列中最多允许的、等待处理的请求的数量
+        //connPool是数据库连接池指针
+        threadpool(connection_pool *connPool, int thread_number = 8, int max_request = 10000);
+        ~threadpool();
+
+        //像请求队列中插入任务请求
+        bool append(T* request);
+
+    private:
+        //工作线程运行的函数
+        //它不断从工作队列中取出任务并执行之
+        static void *worker(void *arg);
+
+        void run();
+
+    private:
+        //线程池中的线程数
+        int m_thread_number;
+
+        //请求队列中允许的最大请求数
+        int m_max_requests;
+
+        //描述线程池的数组，其大小为m_thread_number
+        pthread_t *m_threads;
+
+        //请求队列
+        std::list<T *>m_workqueue;    
+
+        //保护请求队列的互斥锁    
+        locker m_queuelocker;
+
+        //是否有任务需要处理
+        sem m_queuestat;
+
+        //是否结束线程
+        bool m_stop;
+
+        //数据库连接池
+        connection_pool *m_connPool;  
+};
+```
+
+```c++
+//线程池构造函数：创建与回收
+template<typename T>
+threadpool<T>::threadpool( connection_pool *connPool, int thread_number, int max_requests) : m_thread_number(thread_number), m_max_requests(max_requests), m_stop(false), m_threads(NULL),m_connPool(connPool){
+
+    if(thread_number<=0||max_requests<=0)
+        throw std::exception();
+
+    //线程id初始化
+    m_threads=new pthread_t[m_thread_number];
+    if(!m_threads)
+        throw std::exception();
+    for(int i=0;i<thread_number;++i)
+    {
+        //循环创建线程，并将工作线程按要求进行运行
+        if(pthread_create(m_threads+i,NULL,worker,this)!=0){
+            delete [] m_threads;
+            throw std::exception();
+        }
+
+        //将线程进行分离后，不用单独对工作线程进行回收
+        //将线程设置成**脱离态**（detached）后，当这一线程运行结束时，它的**资源会被系统自动回收**，而不再需要在其它线程中对其进行 pthread_join() 操作。
+        if(pthread_detach(m_threads[i])){
+            delete[] m_threads;
+            throw std::exception();
+        }
+    }
+}
+```
+```c++
+//向请求队列中添加任务
+template<typename T>
+bool threadpool<T>::append(T* request)
+{
+    m_queuelocker.lock();
+
+    //根据硬件，预先设置请求队列的最大值
+    if(m_workqueue.size()>m_max_requests)
+    {
+        m_queuelocker.unlock();
+        return false;
+    }
+
+    //添加任务
+    m_workqueue.push_back(request);
+    m_queuelocker.unlock();
+
+    //信号量提醒有任务要处理
+    m_queuestat.post();
+    return true;
+}
+```
+```c++
+//线程处理函数
+template<typename T>
+void* threadpool<T>::worker(void* arg){
+
+    //将参数强转为线程池类，调用成员方法
+    threadpool* pool=(threadpool*)arg;
+    pool->run();
+    return pool;
+}
+```
+```c++
+//run执行任务
+template<typename T>
+void threadpool<T>::run()
+{
+    while(!m_stop)
+    {    
+        //信号量等待
+        m_queuestat.wait();
+
+        //被唤醒后先加互斥锁
+        m_queuelocker.lock();
+        if(m_workqueue.empty())
+        {
+            m_queuelocker.unlock();
+            continue;
+        }
+
+        //从请求队列中取出第一个任务
+        //将任务从请求队列删除
+        T* request=m_workqueue.front();
+        m_workqueue.pop_front();
+        m_queuelocker.unlock();
+        if(!request)
+            continue;
+
+        //从连接池中取出一个数据库连接
+        request->mysql = m_connPool->GetConnection();
+
+        //process(模板类中的方法,这里是http类)进行处理
+        request->process();
+
+        //将数据库连接放回连接池
+        m_connPool->ReleaseConnection(request->mysql);
+    }
+}
+```

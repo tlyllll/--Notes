@@ -23,6 +23,7 @@
 - Undefined: 未定义/未初始化 = NaN = false
 - Symbol(ES6): ~~唯一的姐~~ 唯一的值 就算参数一样也是两个东西，可以用description输出参数
 - BigInt(ES10)
+
 ### 类型判断
 - typeof: Number/String/Boolean/undefined/Object/Symbol 
   - 不能判断（Array, Error, null）-> Object
@@ -473,3 +474,24 @@ let newArr = arr.map((item,index,arr)=>{
 ```
 
 ## 字符串
+### 数组转化字符串
+- toString() 
+- toLocalString()
+- join()            指定分隔符:可以传递一个参数作为分隔符来连接每个元素。如果省略参数，默认使用逗号作为分隔符
+- split()           方法是 String 对象方法，与 join() 方法操作正好相反。
+
+## 事件
+### 事件冒泡
+就是点击最里面的元素，会触发父元素的方法。
+
+```javascript
+event.stopPropagation() //阻止事件的冒泡方法
+event.preventDefault() //阻止默认事件的方法
+```
+### 事件委托
+我们要给每一个按钮绑定一个事件，但是这样遍历，太消耗性能了，于是我们直接给父元素绑定即可完成。
+### 事件捕获
+当鼠标点击或者触发 dom 事件时（被触发 dom 事件的这个元素被叫作事件源），浏览器会从根节点 =>事件源（**由外到内**）进行事件传播。
+
+在捕获的过程中，**最外层**（根）元素的事件**先被触发**，然后依次向内执行，直到触发最里面的元素（事件源)。
+
