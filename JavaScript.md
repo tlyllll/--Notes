@@ -29,6 +29,50 @@
   - 不能判断（Array, Error, null）-> Object
 - instanceof: 判断数据是否是某个对象实例。是不是原型链上的
 - Object.prototype.toString.call()
+### 精度问题
+javascript的浮点数运算就是采用了**IEEE 754的标准**。
+
+ IEEE 754规定了四种表示浮点数值的方式：单精确度（32位）、双精确度（64位）、延伸单精确度（43比特以上，很少使用）与延伸双精确度（79比特以上，通常以80位实现）。
+
+ 其中javascript采用的是 **双精度（64位）浮点运算规则**。
+<img src="./img/2022-12-24-12-38-55.png" style="zoom:100%; margin-left: 14%" />
+ IEEE754存储和运算规则：
+
+ |数符 |阶码| 尾数|
+ |----|----|----|
+ |sign|exponent|fraction|
+ |正负的符号位， 0表示正数，1表示负数|指数偏移值.指数值加上某个固定的值。固定值为：2^e - 1，其中e为存储指数的长度，比如32位的是8，64位的为11|可以理解为小数点部分。超出的部分自动进一舍零|
+
+ 一个浮点数在计算机中表示为：
+
+Value = sign x exponent x function
+
+- 0.1 + 0.2 为什么出现精度失真呢？
+  - 十进制的0.1和0.2会被转换成二进制的，但是由于浮点数用二进制表示时是无穷的
+  - `0.1 -> 0.0001 1001 1001 1001...(1100循环)`
+  - `0.2 -> 0.0011 0011 0011 0011...(0011循环)`
+  -  64 位双精度浮点数的小数部分最多支持53位二进制位
+  -  相加之后得到二进制为`0.0100110011001100110011001100110011001100110011001100`
+  -  点数小数位的限制而截断的二进制数字，再转换为十进制，就成了0.30000000000000004。所以在进行算术计算时会产生误差。
+
+解决方式：
+1. toFixed
+  - 但是还是会有不精准的问题
+  ```javascript
+    1.35.toFixed(1) // 1.4 正确
+    1.335.toFixed(2) // 1.33  错误
+    1.3335.toFixed(3) // 1.333 错误
+    1.33335.toFixed(4) // 1.3334 正确
+    1.333335.toFixed(5)  // 1.33333 错误
+    1.3333335.toFixed(6) // 1.333333 错误
+  ```
+2. 小数转化为整数再进行计算
+    ```javascript
+    function roundFractional(x, n) {
+      return Math.round(x * Math.pow(10, n)) / Math.pow(10, n);
+    }
+    ```
+3. 第三方库【bignumber.js/decimal.js/big.js】
 
 ## 创建变量
 ### var/ let /const
@@ -74,7 +118,7 @@ JavaScript 的执行分为：解释和执行两个阶段
 
  javascript是一门**单线程**语言，任务分为同步和异步
 
- ![](./img/2022-12-09-15-16-54.png)
+ <img src="./img/2022-12-09-15-16-54.png" style="zoom:40%;" />
 
 - 当指定的事情完成时，Event Table会将这个函数移入Event Queue。
 - 主线程内的任务执行完毕为空，会去Event Queue读取对应的函数，进入主线程执行。
@@ -157,7 +201,7 @@ Promise 本身是同步的立即执行函数， 当在 executor 中执行 resolv
 - macro-task(宏任务)：包括**整体代码**script，setTimeout，setInterval
 - micro-task(微任务)：Promise，process.nextTick
 
-![](./img/2022-12-09-16-07-15.png)
+<img src="./img/2022-12-09-16-07-15.png" style="zoom:33%;" />
 
 ### async/await
 ```javascript
@@ -209,14 +253,17 @@ function test() {
 - this 总是指称为窗口（在 Node.js 中，全局对象是 global 。）
 - 严格模式中：普通函数中的 this 绑定到 undefined 
   
-![](./img/2022-12-13-13-42-22.png)
+
+<img src="./img/2022-12-13-13-42-22.png" style="zoom:40%;" />
 
 **在函数中：**
 函数可以大致分为在全局中声明的**一般函数**和在**对象中声明的方法**。
+
 - **一般函数**：指向窗口[窗口对象中的函数]
 - **对象中声明的方法**：所有函数都在对象内部。this 指的是当前正在执行该函数的对象
 
 **总结：**
+
 - 在函数中/单独 ->全局对象
 - 在对象中的函数中 ->对象
 - this 指的是当前正在执行该函数的对象
@@ -258,7 +305,8 @@ example.apply(null, [1, 2, 3]); //两个参数，第二个是数组
 
 ### 总结
 this指向优先级
-![](./img/2022-12-13-13-54-44.png)
+
+<img src="./img/2022-12-13-13-54-44.png" style="zoom:35%;" />
 
 ## scope作用域
 ES6 之前 JavaScript 没有块级作用域,只有全局作用域和函数作用域
@@ -271,40 +319,41 @@ ES6 之前 JavaScript 没有块级作用域,只有全局作用域和函数作用
 - 最外层函数 
 - 在最外层函数外面定义的变量拥有全局作用域
 
-        ```javascript
-        var outVariable = "我是最外层变量"; //最外层变量
-        function outFun() {
-            //最外层函数
-            var inVariable = "内层变量";
-            function innerFun() {
-                //内层函数
-                console.log(inVariable);
-            }
-            innerFun();
+    ```javascript
+    var outVariable = "我是最外层变量"; //最外层变量
+    function outFun() {
+        //最外层函数
+        var inVariable = "内层变量";
+        function innerFun() {
+            //内层函数
+            console.log(inVariable);
         }
-        console.log(outVariable); //我是最外层变量
-        outFun(); //内层变量
-        console.log(inVariable); //inVariable is not defined
-        innerFun(); //innerFun is not defined
-        ```
+        innerFun();
+    }
+    console.log(outVariable); //我是最外层变量
+    outFun(); //内层变量
+    console.log(inVariable); //inVariable is not defined
+    innerFun(); //innerFun is not defined
+    ```
 - 所有**末定义直接赋值**的变量**自动声明为拥有全局作用域**
 
-        ```javascript
-        unction outFun2() {
-            variable = "未定义直接赋值的变量";
-            var inVariable2 = "内层变量2";
-        }
-        outFun2(); //要先执行这个函数，否则根本不知道里面是啥
-        console.log(variable); //未定义直接赋值的变量
-        console.log(inVariable2); //inVariable2 is not defined
-        ```
+    ```javascript
+    function outFun2() {
+        variable = "未定义直接赋值的变量";
+        var inVariable2 = "内层变量2";
+    }
+    outFun2(); //要先执行这个函数，否则根本不知道里面是啥
+    console.log(variable); //未定义直接赋值的变量
+    console.log(inVariable2); //inVariable2 is not defined
+    ```
 
 - 所有 window 对象的属性拥有全局作用域
 
 **函数作用域**,是指声明在函数内部的变量，和全局作用域相反，局部作用域一般只在固定的代码片段内可访问到，最常见的例如函数内部。
 
 作用域是分层的，内层作用域可以访问外层作用域的变量，反之则不行。我们看个例子，用泡泡来比喻作用域可能好理解一点：
-![](./img/2022-12-15-16-02-33.png)
+
+<img src="./img/2022-12-15-16-02-33.png" style="zoom:67%;" />
 
 块语句（大括号“｛｝”中间的语句不像函数，它们不会创建一个新的作用域。
 - if

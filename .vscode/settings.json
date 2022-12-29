@@ -1,0 +1,12 @@
+{
+    "cSpell.words": [
+        "epfd",
+        "EPOLLERR",
+        "EPOLLET",
+        "EPOLLHUP",
+        "EPOLLIN",
+        "EPOLLONESHOT",
+        "EPOLLOUT",
+        "EPOLLPRI"
+    ]
+}

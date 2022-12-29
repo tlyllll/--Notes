@@ -4,15 +4,5 @@
 			"path": "."
 		}
 	],
-	"settings": {
-		"files.associations": {
-			"vector": "cpp",
-			"iosfwd": "cpp"
-		},
-		"cSpell.words": [
-			"iostream",
-			"malloc",
-			"mystl"
-		]
-	}
+	"settings": {}
 }

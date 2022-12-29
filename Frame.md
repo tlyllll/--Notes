@@ -1,9 +1,45 @@
 # vue
 是js框架
+## Vue.nextTick()
+当数据更新了，在dom中渲染后，自动执行该函数，
 
-TODO
-computed: 像data，预处理的data。要加this就能读取到data里的数据
-watch
+Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.nextTick()的回调函数中，原因是在created()钩子函数执行的时候DOM 其实并未进行任何渲染，而此时进行DOM操作无异于徒劳，所以此处一定要将DOM操作的js代码放进Vue.nextTick()的回调函数中。与之对应的就是mounted钩子函数，因为该钩子函数执行时所有的DOM挂载已完成。
+## 监听
+### computed
+### watch
+```javascript
+data () {
+  food: 0
+},
+watch: {
+	// 第一种方式：监听整个对象，每个属性值的变化都会执行handler
+	// 注意：属性值发生变化后，handler执行后获取的 newVal 值和 oldVal 值是一样的
+    food: {
+        // 每个属性值发生变化就会调用这个函数
+        handler(newVal, oldVal) {
+            console.log('oldVal:', oldVal)
+            console.log('newVal:', newVal)
+        },
+        // 立即处理 进入页面就触发
+        immediate: true,
+        // 深度监听 属性的变化
+        //对象和数组都是引用类型，引用类型变量存的是地址，地址没有变，所以不会触发watch。这时我们需要进行深度监听，就需要加上一个属性 deep，值为 true
+        deep: true
+    },
+    // 第二种方式：监听对象的某个属性，被监听的属性值发生变化就会执行函数
+    // 函数执行后，获取的 newVal 值和 oldVal 值不一样
+    'food.name'(newVal, oldVal) {
+        console.log('oldVal:', oldVal)   // 冰激凌
+        console.log('newVal:', newVal)   // 棒棒糖
+    }
+}
+```
+### computed watch对比
+1. computed支持**缓存**，只有**依赖数据发生改变**,才会重新进行计算;而watch**不支持缓存**，**数据变,直接会触发**相应的操作
+2. computed**不支持异步**，当computed内有异步操作时无效，无法监听数据的变化，而watch支持异步
+3. computed属性值会默认走缓存，计算属性是基于它们的响应式依赖进行缓存的，也就是**基于data中声明过或者父组件传递的props中的数据通过计算得到的值**;而watch监听的函数接收两个参数，第一个参数是最新的值，第二个参数是输入之前的值
+4. 如果一个属性是由其它属性计算而来的，这个属性依赖其它属性，多对一或者一对一，一般用computed；而当一个属性发生变化时，需要执行对应的操作，一对多，一般用watch
+
 ## 绑定
 单向绑定 v-bind:
 双向绑定 v-model@
