@@ -4,7 +4,7 @@
 1. js分为**函数对象**和**普通对象**，每个对象都有`__proto__`属性，但是只有函数对象才有`prototype`属性
 2. Object、Function都是js内置的函数, 类似的还有我们常用到的Array、RegExp、Date、Boolean、Number、String
 
-- 属性__proto__是一个对象, 它有两个属性，constructor和__proto__
+- 属性`__proto__`是一个对象, 它有两个属性，`constructor`和`__proto__`
 ```javascript
 {
     __proto__:{
@@ -14,6 +14,267 @@
 }
 ```
 - 原型对象prototype有一个默认的constructor属性，用于记录实例是由哪个构造函数创建；
+- 实例对象的`__proto__` = 实例对象构造函数的`prototype`
+- 这里可以看出三者关系：
+  - 实例.__proto__ === 原型(prototype) ；
+  - 原型(prototype).constructor === 构造函数 ；
+  - 构造函数.prototype === 原型 ；
+#### Q:{}，new Object()和Object.create()的区别?
+1. {}等价于new Object(), 都继承了Object原型链上(Object.prototype)的属性或者方法，eg：toString()；当创建的对象相同时，可以说 {} 等价于 new Object() 。
+2. Object.create() 是将**创建的对象**继承到原型链上，而**本身没有继承** Object.prototype 的属性和方法。
+## 继承
+### 原型链继承
+![](./img/2023-01-10-14-26-26.png)
+核心： 子类.prototype = 父类实例
+```javascript
+function Parent() {
+   this.isShow = true
+   this.info = {
+       name: "mjy",
+       age: 18,
+   };
+}
+ 
+Parent.prototype.getInfo = function() {
+   console.log(this.info);
+   console.log(this.isShow);
+}
+ 
+function Child() {};
+Child.prototype = new Parent();
+ 
+let Child1 = new Child();
+Child1.info.gender = "男";
+Child1.getInfo(); // {name: 'mjy', age: 18, gender: '男'} true
+ 
+let child2 = new Child();
+child2.isShow = false
+console.log(child2.info.gender) // 男
+child2.getInfo(); // {name: 'mjy', age: 18, gender: '男'} false
+Child1.getInfo(); // {name: 'mjy', age: 18, gender: '男'} true
+//两个子实例修改互不影响
+```
+优点：写法方便简洁，容易理解。
+
+缺点：
+1. 新实例无法向父类构造函数传参。
+2. 继承单一。无法实现多继承
+3. 子类实例共享了父类构造函数的引用属性（原型上的引用属性是共享的，一个实例修改了引用属性，另一个实例的属性也会被修改！）【理解为继承的是指针，指针不更改，更改指向的东西，那必定会变】
+### 借用构造函数继承
+核心：借用父类的构造函数来增强子类实例，等于是复制父类的实例属性给子类
+
+![](./img/2023-01-10-15-04-03.png)
+
+使用.call/.apply
+```javascript
+function Child(name,like){
+　　Parent.call(this,name);//核心，拷贝了父类的实例属性和方法
+　　this.like = like;
+}
+```
+1. 只继承了父类构造函数的属性，**没有继承父类原型**的属性。
+2. 解决了原型链继承缺点1、2、3。
+3. 可以继承多个构造函数属性（call多个）。
+4. 在子实例中可向父实例**传参**。
+
+缺点：
+1. 每个新实例都有父类构造函数的副本，臃肿。【也就是说每个实例的父类构造函数都是深拷贝得到的，所以怎么修改都互不影响】
+2. 无法实现构造函数的复用。（每次用每次都要重新调用）
+3. 只能继承父类构造函数的属性。
+
+### 组合继承【构造函数+原型链】
+![](./img/2023-01-10-15-03-16.png)
+
+```javascript
+function Parent(gender) {
+   this.isShow = true
+   this.info = {
+       name: "mjy",
+       age: 18,
+       gender: gender
+   };
+}
+ 
+Parent.prototype.getInfo = function() {
+   console.log(this.info);
+   console.log(this.isShow);
+}
+ 
+function Child(gender) {
+    Parent.call(this, gender) //核心
+};
+Child.prototype = new Parent();//核心
+```
+优点：
+1. 创造子类实例，可以向父类构造函数传参；
+2. 不共享父类的引用属性
+3. 父类的方法定义在父类的原型对象上，实现方法复用；
+
+缺点： 
+调用了两次父类的构造方法，会存放一份**多余的父类实例属性**
+
+### 原型式继承
+核心：用一个函数包装一个对象，然后返回这个函数的调用，这个函数就变成了个可以随意增添属性的实例或对象。object.create()就是这个原理。
+
+类似于复制一个对象，用函数来包装，不需要单独创建构造函数。
+
+![](./img/2023-01-10-15-28-38.png)
+
+```javascript
+function createObject(obj) {
+  function Fun() {}
+  Fun.prototype = obj
+  return new Fun()
+}
+ 
+let person = {
+  name: 'mjy',
+  age: 18,
+  hoby: ['唱', '跳'],
+  showName() {
+    console.log('my name is:', this.name)
+  }
+}
+ 
+let child1 = createObject(person)
+child1.name = 'xxxy'
+child1.hoby.push('rap')
+let child2 = createObject(person)
+ 
+console.log(child1)
+console.log(child2)
+console.log(person.hoby) // ['唱', '跳', 'rap']
+//也可以
+var sup = new Person()
+var sup = content(sup)
+```
+
+缺点：
+1. 属性中包含的引用值始终会在相关对象间共享
+2. 子类实例不能向父类传参
+
+### 寄生
+核心， 在原型式基础上套了个壳子
+```javascript
+function objectCopy(obj) {
+  function Fun() { };
+  Fun.prototype = obj;
+  return new Fun();
+}
+ 
+function createAnother(obj) {
+  let clone = objectCopy(obj);
+  clone.showName = function () {
+    console.log('my name is：', this.name);
+  };
+  return clone;
+}
+ 
+let person = {
+     name: "mjy",
+     age: 18,
+     hoby: ['唱', '跳']
+}
+ 
+let child1 = createAnother(person);
+child1.hoby.push("rap");
+console.log(child1.hoby); // ['唱', '跳', 'rap']
+child1.showName(); // my name is： mjy
+ 
+let child2 = createAnother(person);
+console.log(child2.hoby); // ['唱', '跳', 'rap']
+```
+
+### 寄生组合
+寄生组合继承就是为了降低父类构造函数的开销而实现的。
+
+![](./img/2023-01-10-16-50-43.png)
+
+```javascript
+//作用：让child.prototype的__proto__=Parent.prototype
+function objectCopy(obj) {
+  function Fun() { };
+  Fun.prototype = obj;
+  return new Fun();
+}
+ 
+function inheritPrototype(child, parent) {
+  let prototype = objectCopy(parent.prototype);
+  prototype.constructor = child;
+  Child.prototype = prototype;
+}
+ 
+function Parent(name) {
+  this.name = name;
+  this.hoby = ['唱', '跳']
+}
+ 
+Parent.prototype.showName = function () {
+  console.log('my name is：', this.name);
+}
+ 
+function Child(name, age) {
+  Parent.call(this, name); //作用：可以给父类传参 但只能继承父类构造函数的属性。
+  this.age = age;
+}
+ 
+inheritPrototype(Child, Parent);
+Child.prototype.showAge = function () {
+  console.log('my age is：', this.age);
+}
+ 
+let child1 = new Child("mjy", 18);
+child1.showAge(); // 18
+child1.showName(); // mjy
+child1.hoby.push("rap");
+console.log(child1.hoby); // ['唱', '跳', 'rap']
+ 
+let child2 = new Child("yl", 18);
+child2.showAge(); // 18
+child2.showName(); // yl
+console.log(child2.hoby); // ['唱', '跳']
+```
+优点：
+1. 高效率只调用一次父构造函数，
+2. 并且因此避免了在子原型上面创建不必要，多余的属性。
+3. 与此同时，原型链还能保持不变；
+
+### class实现继承[ES6]
+```javascript
+//父类
+class Employee {
+//构造函数
+  constructor(name, dept) {
+    this.name = name
+    this.dept = dept
+  }
+  //静态方法
+  //static只能修饰class的方法，而不能修饰属性。静态方法不在实例化对象的方法中，里面不能有this。
+  //通过实例出来的对象可以，调用构造函数上面的方法。
+  static fun() {
+    console.log('static')
+  }
+  getName() {
+    console.log(this.name)
+  }
+}
+
+//子类
+class Manager extends Employee {
+  constructor(name, dept, reports) {
+    super(name, dept)
+    this.reports = reports
+  }
+  FunctionName() {
+    /*写自己的逻辑*/
+  }
+}
+```
+特点：
+1. 函数声明具有可提升性，虽然类本质上是函数，但是类的声明却不可提升，也就是说你一定要先声明类，才能创建对象。
+2. 无法重写，无法重复声明
+3. 不需要 function 关键字。
+4. 必须使用new关键字。
 ## 基本数据类型
 - String
 - Number
@@ -99,6 +360,58 @@ Value = sign x exponent x function
 函数也一样
 
 变量提升 > 函数提升
+
+### 深拷贝/浅拷贝
+
+##### 浅拷贝：
+
+创造了一个引用/共享内存
+
+实现方法：
+
+1. `Object.assign()`: 方法可以把任意多个的源对象自身的可枚举属性拷贝给目标对象，然后返回目标对象。但是 Object.assign() 进行的是浅拷贝，**拷贝的是对象的属性的引用，而不是对象本身**。当object**只有一层**的时候，是**深拷贝**
+
+2. 展开运算符`...`: 与 Object.assign ()的功能相同
+
+   1. ```javascript
+      let obj2= {... obj1}
+      ```
+
+##### 深拷贝：
+
+创造了一个一摸一样的对象
+
+实现方法:
+
+1. 对象只有一层的话可以使用上面的：Object.assign()函数
+
+2. 使用JSON
+
+   1. 不支支持 **Date、正则、undefined、函数**
+
+   2. ```javascript
+      var obj1 = { body: { a: 10 } };
+      var obj2 = JSON.parse(JSON.stringify(obj1));
+      obj2.body.a = 20;
+      console.log(obj1);
+      // { body: { a: 10 } } <-- 沒被改到
+      console.log(obj2);
+      // { body: { a: 20 } }
+      console.log(obj1 === obj2);
+      // false
+      console.log(obj1.body === obj2.body);
+      // false
+      ```
+
+3. 使用`Object.create()`方法
+
+   1. ```javascript
+      var newObj = Object.create(oldObj)
+      ```
+
+      
+
+
 
 ## ==和===的区别
 - `==` **值**相等。会先做类型转换，之后再判断值大小
@@ -281,7 +594,48 @@ function test() {
   - 普通函数中的 this 是动态的，
 
 - 箭头函数不能通过 bind、call、apply 来改变 this 的值，但依然可以调用这几个方法（只是 this 的值不受这几个方法控制）
+#### 写法
+```javascript
+// 普通函数
+let sum = function(a, b) {
+	return a + b;
+}
+// 箭头函数
+let sum1 = (a, b) => {
+	return a + b;
+}
+//如果只有一个参数，那也可以不用括号。
+// 有效
+let sum = (x) => {
+	return x;
+};
+// 有效
+let sum1 = x => {
+	return x;
+};
+// 没有参数需要括号
+let sum2 = () => {
+	return 1;
+};
+// 有多个参数需要括号
+let sum3 = (a, b) => {
+	return a + b;
+};
+//箭头函数也可以不用大括号，但这样会改变函数的行为。使用大括号就说明包含“函数体”，可以在一个函数中包含多条语句，跟常规的函数一样。
+// 有效
+let sum = (a, b) => {
+	return a + b;
+};
+// 有效
+let sum1 = (a, b) => a + b; // 相当于 return a + b;
+// 无效的写法
+let sum2 = (a, b) => return a + b;
 
+//箭头函数简洁的语法非常适合嵌入函数的场景：
+let arr = [1, 2, 3, 4, 5];
+arr.map(val => val * 2); // [2, 4, 6, 8, 10]
+
+```
 ### call()/apply()/bind()
 - 第一个参数都是 this 要指向的对象
 - 都是改变 this 指向的；
@@ -387,7 +741,80 @@ function getValue(condition) {
 ### 闭包
 能在外部访问到内部信息
 
+**优点**：变量长期驻扎在内存中，不会被内存回收机制回收，即延长变量的生命周期；
 
+**缺点**：大量使用闭包，造成内存占用空间增大，有内存泄露的风险
+#### 如何避免内存泄露
+1. 在退出函数之前，将不使用的局部变量赋值为null;
+2. 避免变量的循环赋值和引用。 
+#### 常用的应用场景
+##### 柯里化函数
+```javascript
+//普通函数
+function getArea(w,h){
+    return w * h;
+}
+const area1 = getArea(10,20);
+const area2 = getArea(10,30);
+const area3 = getArea(10,40);
+
+//柯里化函数
+function getArea(w){
+    return function(h){
+        return w * h;
+    }
+}
+const getTenArea = getArea(10); //return 10*h
+
+const area1 = getTenArea(20); //200
+const area2 = getTenArea(30); //300
+const area3 = getTenArea(40); //400
+```
+##### 通过闭包实现变量/方法的私有化/函数封装
+例如封装一个防抖函数/log函数
+
+下面这个例子有点像log
+```javascript
+function funOne(i){
+    function getTwo(){
+        console.log('参数：', i)
+    }
+    return getTwo;
+}
+const fa = funOne(100); 
+const fb = funOne(200); 
+const fc = funOne(300); 
+```
+##### 匿名自执行函数
+```javascript
+var funOne = (function(){
+    var num = 0;
+    return function(){
+        num++;
+        return num;
+    }
+})()
+
+console.log(funOne());   // 1
+console.log(funOne());   // 2
+console.log(funOne());   // 3 
+```
+##### 缓存一些结果
+```javascript
+function parent(){
+    let list = [];
+    function son(i){
+        list.push(i);
+    }
+    return son;
+}
+
+const fn = parent();
+
+fn(1);
+fn(2);
+fn(3);
+```
 ### 作用域链
 自由变量 = 当前作用域没有定义的变量
 
@@ -543,4 +970,46 @@ event.preventDefault() //阻止默认事件的方法
 当鼠标点击或者触发 dom 事件时（被触发 dom 事件的这个元素被叫作事件源），浏览器会从根节点 =>事件源（**由外到内**）进行事件传播。
 
 在捕获的过程中，**最外层**（根）元素的事件**先被触发**，然后依次向内执行，直到触发最里面的元素（事件源)。
+## 内存管理
+### 内存回收
+JS 有自动垃圾回收机制 ： 垃圾回收机制自动回收**不再使用**的内存
+
+局部变量：一般函数运行结束，没有其他引用（闭包），那么该变量会被回收
+
+全局变量：直至浏览器卸载页面才会结束，也就是说全局变量不会被当成垃圾回收。
+
+### 内存泄漏
+己动态分配的内存由于某种原因程序未释放或无法释放，造成系统内存的浪费，导致程序运行速度减慢甚至系统崩溃等严重后果。
+
+#### 常见的内存泄露
+1. 意外的全局变量（就是上面所说的全局变量不能被js垃圾回收机制回收）
+   - 一个**未声明变量**的使用【也就是没有var/let/const】，会在全局对象中创建一个新的变量；在浏览器环境下，全局对象就是window
+   - **解决**：变量使用完后将变量的内存释放/开严格模式
+2. 计时器和回调函数
+   - 定时器`setinterval`或者`settimeout`在不需要使用的时候，没有被clear，定时器无法被内存回收，导致定时器的回调函数及其内部依赖的变量都不能被回收，这就会造成内存泄漏。 
+   - 如果你没有回收定时器，整个定时器依然有效, 不但定时器无法被内存回收， 定时器的**回调函数**和**回调函数中的依赖**也无法回收。在这个案例中定时器的回调函数和回调函数里面的的**依赖变量（serverData ）**也无法被回收。
+   - **解决**：当不需要interval定时器或者timeout定时器的时候，调用`clearinterval`或者`cleartimeout`清除定时器
+3. DOM: 将dom元素已经移除，但是对dom元素的引用没有清除，也会造成内存泄露
+   - **解决：** 利用null释放内存
+4. 闭包
+   - 手动释放内存,设置为null 
+
+
+## 存储问题
+### localstorage/sessionstorage/cookies
+
+#### 相同点
+Cookie、SessionStorage和LocalStorage都是存储在浏览器本地的
+#### 不同点
+1. cookie是由**服务器端写入**的，而SessionStorage、 LocalStorage都是由**前端写入**的
+
+2. cookie的生命周期是由服务器端在写入的时候就设置好的，LocalStorage是写入就一直存在，**除非手动清除**，SessionStorage是**页面关闭**的时候就会**自动清除**。
+  
+3. cookie的存储空间比较小大概4KB，SessionStorage、 LocalStorage存储空间比较大，大概5M。
+
+4. Cookie、SessionStorage、 LocalStorage数据共享都遵循同源原则，SessionStorage 还**限制必须是同一个页面**。
+
+5. 在前端给后端发送请求的时候**会自动携带Cookie中的数据**，但SessionStorage、 LocalStorage不会
+
+6. 它们的应用场景也不同，Cookie一般用于存储登录验证信息SessionID或者token，LocalStorage常用于存储不易变动的数据，减轻服务器的压力，SessionStorage可以用来检测用户是否是刷新进入页面，如音乐播放器恢复播放进度条的功能。
 

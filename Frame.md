@@ -1,19 +1,26 @@
 # vue
+
 是js框架
+
 ## Vue.nextTick()
+
 当数据更新了，在dom中渲染后，自动执行该函数，
 
 Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.nextTick()的回调函数中，原因是在created()钩子函数执行的时候DOM 其实并未进行任何渲染，而此时进行DOM操作无异于徒劳，所以此处一定要将DOM操作的js代码放进Vue.nextTick()的回调函数中。与之对应的就是mounted钩子函数，因为该钩子函数执行时所有的DOM挂载已完成。
+
 ## 监听
+
 ### computed
+
 ### watch
+
 ```javascript
 data () {
   food: 0
 },
 watch: {
-	// 第一种方式：监听整个对象，每个属性值的变化都会执行handler
-	// 注意：属性值发生变化后，handler执行后获取的 newVal 值和 oldVal 值是一样的
+ // 第一种方式：监听整个对象，每个属性值的变化都会执行handler
+ // 注意：属性值发生变化后，handler执行后获取的 newVal 值和 oldVal 值是一样的
     food: {
         // 每个属性值发生变化就会调用这个函数
         handler(newVal, oldVal) {
@@ -34,18 +41,129 @@ watch: {
     }
 }
 ```
+
 ### computed watch对比
+
 1. computed支持**缓存**，只有**依赖数据发生改变**,才会重新进行计算;而watch**不支持缓存**，**数据变,直接会触发**相应的操作
 2. computed**不支持异步**，当computed内有异步操作时无效，无法监听数据的变化，而watch支持异步
 3. computed属性值会默认走缓存，计算属性是基于它们的响应式依赖进行缓存的，也就是**基于data中声明过或者父组件传递的props中的数据通过计算得到的值**;而watch监听的函数接收两个参数，第一个参数是最新的值，第二个参数是输入之前的值
 4. 如果一个属性是由其它属性计算而来的，这个属性依赖其它属性，多对一或者一对一，一般用computed；而当一个属性发生变化时，需要执行对应的操作，一对多，一般用watch
 
 ## 绑定
+
 单向绑定 v-bind:
 双向绑定 v-model@
 事件绑定 v-on:click="methods"
+## Class 与 Style 绑定
+### Class
+```html
+<div
+  class="static"
+  :class="{ active: isActive, 'text-danger': hasError }"
+></div>
+```
+active和‘text-danger’都是类名，是否绑定分别取决于isActive和hasError的布尔值
+
+绑定的对象并不一定需要写成内联字面量的形式，也可以直接绑定一个**对象**：
+```html
+<div :class="classObject"></div>
+```
+```javascript
+data() {
+  return {
+    classObject: {
+      active: true,
+      'text-danger': false
+    }
+  }
+}
+
+```
+
+我们也可以绑定一个返回对象的**计算属性**。
+
+```javascript
+data() {
+  return {
+    isActive: true,
+    error: null
+  }
+},
+computed: {
+  classObject() {
+    return {
+      active: this.isActive && !this.error,
+      'text-danger': this.error && this.error.type === 'fatal'
+    }
+  }
+}
+```
+也可以绑定**数组**
+```html
+<div :class="[activeClass, errorClass]"></div>
+```
+```javascript
+data() {
+  return {
+    activeClass: 'active',
+    errorClass: 'text-danger'
+  }
+}
+
+```
+渲染的结果： `<div class="active text-danger"></div>`
+
+也可以使用**三元表达式**
+```html
+<div :class="[isActive ? activeClass : '', errorClass]"></div>
+```
+`errorClass` 会一直存在，但 `activeClass` 只会在 `isActive` 为真时才存在
+
+因此也可以在**数组中嵌套对象**：
+```html
+<div :class="[{ active: isActive }, errorClass]"></div>
+```
+### style
+```html
+<div :style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
+```
+```javascript
+data() {
+  return {
+    activeColor: 'red',
+    fontSize: 30
+  }
+}
+```
+也可以
+```html
+<div :style="{ 'font-size': fontSize + 'px' }"></div>
+```
+
+也能直接绑定一个样式**对象**
+```html
+<div :style="styleObject"></div>
+```
+```javascript
+data() {
+  return {
+    styleObject: {
+      color: 'red',
+      fontSize: '13px'
+    }
+  }
+}
+```
+也可以使用返回样式对象的计算属性
+
+我们还可以给 :style 绑定一个包含多个样式对象的数组。这些对象会被合并后渲染到同一元素上：
+```html
+<div :style="[baseStyles, overridingStyles]"></div>
+```
 ## 双向绑定实现
+
 ### MVVM
+
 ![](./img/2022-12-19-18-12-11.png)
 是一个软件架构设计模式
 Model-View-ViewModel的简写，是M-V-VM三部分组成.
@@ -53,6 +171,7 @@ Model-View-ViewModel的简写，是M-V-VM三部分组成.
 它本质上是MVC的改进版本
 
 能够实现**前端开发**和**后端业务逻辑的分离**，
+
 - model指数据模型，负责后端业务逻辑处理，
 - view指视图层，负责前端整个用户界面的实现，
 - viewModel则负责**view层和model层的交互**
@@ -60,8 +179,11 @@ Model-View-ViewModel的简写，是M-V-VM三部分组成.
 关注model的变化，让MVVM框架利用自己的机制**自动更新DOM**，也就是所谓的**数据-视图分离**，数据不会影响视图。
 
 ![](./img/2022-12-19-18-18-25.png)
+
 ### 实现mvvm的双向绑定
+
 ![](./img/2022-12-22-11-30-54.png)
+
 - 数据监听器Observer，能够对数据对象的所有**属性进行监听**，如有变动可拿到最新值并**通知订阅者**
 - 指令解析器Compile，对每个**元素节点**的指令进行扫描和解析，根据指令模板**替换数据**，以及绑定相应的更新函数
 - Watcher，作为连接Observer和Compile的桥梁，能够订阅并收到每个属性变动的通知，执行指令绑定的相应回调函数，从而更新视图
@@ -69,106 +191,116 @@ Model-View-ViewModel的简写，是M-V-VM三部分组成.
 ![](./img/2022-12-22-12-10-59.png)
 
 ### 原理概述
+
 常见的基于数据劫持的双向绑定有两种实现
+
 1. 一个是目前Vue在用的 `Object.defineProperty`
 2. 一个是ES2015中新增的 `Proxy`，而在**Vue3.0版本**后加入Proxy从而代替Object.defineProperty
 
 数据劫持: vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过Object.defineProperty() 来劫持各个属性的 `setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调。
-### observer.js
-```javascript
-	/**
-	 * 把一个对象的每一项都转化成可观测对象
-	 * @param { Object } obj 对象
-	 */
-	function observable (obj) {
-		if (!obj || typeof obj !== 'object') {
-        	return;
-    	}
-		let keys = Object.keys(obj);
-		keys.forEach((key) =>{
-			defineReactive(obj,key,obj[key])
-		})
-		return obj;
-	}
-	/**
-	 * 使一个对象转化成可观测对象
-	 * @param { Object } obj 对象
-	 * @param { String } key 对象的key
-	 * @param { Any } val 对象的某个key的值
-	 */
-	function defineReactive (obj,key,val) {
-		let dep = new Dep();
-		Object.defineProperty(obj, key, {
-			get(){
-				dep.depend();
-				console.log(`${key}属性被读取了`);
-				return val;
-			},
-			set(newVal){
-				val = newVal;
-				console.log(`${key}属性被修改了`);
-				dep.notify()                    //数据变化通知所有订阅者
-			}
-		})
-	}
-	class Dep {
-		
-		constructor(){
-			this.subs = []
-		}
-		//增加订阅者
-		addSub(sub){
-			this.subs.push(sub);
-		}
-        //判断是否增加订阅者
-		depend () {
-		    if (Dep.target) {
-		     	this.addSub(Dep.target)
-		    }
-		}
 
-		//通知订阅者更新
-		notify(){
-			this.subs.forEach((sub) =>{
-				sub.update()
-			})
-		}
-		
-	}
-	Dep.target = null;
+### observer.js
+
+```javascript
+ /**
+  * 把一个对象的每一项都转化成可观测对象
+  * @param { Object } obj 对象
+  */
+ function observable (obj) {
+  if (!obj || typeof obj !== 'object') {
+         return;
+     }
+  let keys = Object.keys(obj);
+  keys.forEach((key) =>{
+   defineReactive(obj,key,obj[key])
+  })
+  return obj;
+ }
+ /**
+  * 使一个对象转化成可观测对象
+  * @param { Object } obj 对象
+  * @param { String } key 对象的key
+  * @param { Any } val 对象的某个key的值
+  */
+ function defineReactive (obj,key,val) {
+  let dep = new Dep();
+  Object.defineProperty(obj, key, {
+   get(){
+    dep.depend();
+    console.log(`${key}属性被读取了`);
+    return val;
+   },
+   set(newVal){
+    val = newVal;
+    console.log(`${key}属性被修改了`);
+    dep.notify()                    //数据变化通知所有订阅者
+   }
+  })
+ }
+ class Dep {
+  
+  constructor(){
+   this.subs = []
+  }
+  //增加订阅者
+  addSub(sub){
+   this.subs.push(sub);
+  }
+        //判断是否增加订阅者
+  depend () {
+      if (Dep.target) {
+        this.addSub(Dep.target)
+      }
+  }
+
+  //通知订阅者更新
+  notify(){
+   this.subs.forEach((sub) =>{
+    sub.update()
+   })
+  }
+  
+ }
+ Dep.target = null;
 
 ```
+
 ### watcher.js
+
 ```javascript
-	class Watcher {
-		constructor(vm,exp,cb){
-		    this.vm = vm;
-		    this.exp = exp;
-		    this.cb = cb;
-		    this.value = this.get();  // 将自己添加到订阅器的操作
-		}
-		get(){
-			Dep.target = this;  // 缓存自己
-        	let value = this.vm.data[this.exp]  // 强制执行监听器里的get函数
-        	Dep.target = null;  // 释放自己
-        	return value;
-		}
-		update(){
-			let value = this.vm.data[this.exp];
-        	let oldVal = this.value;
-        	if (value !== oldVal) {
+ class Watcher {
+  constructor(vm,exp,cb){
+      this.vm = vm;
+      this.exp = exp;
+      this.cb = cb;
+      this.value = this.get();  // 将自己添加到订阅器的操作
+  }
+  get(){
+   Dep.target = this;  // 缓存自己
+         let value = this.vm.data[this.exp]  // 强制执行监听器里的get函数
+         Dep.target = null;  // 释放自己
+         return value;
+  }
+  update(){
+   let value = this.vm.data[this.exp];
+         let oldVal = this.value;
+         if (value !== oldVal) {
                 this.value = value;
                 this.cb.call(this.vm, value, oldVal);
-			}
-	}
+   }
+ }
 }
 
 ```
 
 [Vue双向绑定原理及实现](https://www.cnblogs.com/wangjiachen666/p/9883916.html)
+
 ## **组件间通信**
+
 ### 父子组件通信
+
 **1. props/$emit**
+
 - `props`: 从 父组件接受数据
 - `$emit`: 向父组件传送数据
 
@@ -196,6 +328,7 @@ export default {
 }
 //
 ```
+
 ```javascript
 // Child.vue -->
  <button @click="send">子组件将值传递给父组件</button>
@@ -217,6 +350,7 @@ export default {
 
 **2. ref**
 父组件调用子组件中的事件方法
+
 ```javascript
 // Child.vue -->
 export default {
@@ -229,6 +363,7 @@ export default {
 }
 
 ```
+
 ```javascript
 // Father.vue -->
     <Child ref="child" />
@@ -247,20 +382,24 @@ export default {
 }
 //
 ```
+
 除此之外，父组件还可以通过ref来引用和访问子组件。同样的，还可以使用$parent、$children、$root等 API 来分别获取父实例、子实例和根实例。
 **3. $parent / $child**
 
 this.$children 是一个数组类型，它包含所有子组件对象。父访问子
 
 this.$parent 子访问父
+
 ### 祖孙$attrs/ $listeners
+
 `$attrs`
+
 1. 包含了父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外);
 2. 当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind=“$attrs” 传入内部组件。通常配合 interitAttrs 选项一起使用。
 `$listeners`
 1. 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。
 2. 它可以通过 v-on=“$listeners” 传入内部组件。
-简单来说：`$attrs` 与`$listeners`是两个对象，`$attrs `里存放的是父组件中绑定的非 Props 属性，`$listeners` 里存放的是父组件中绑定的非原生事件
+简单来说：`$attrs` 与`$listeners`是两个对象，`$attrs`里存放的是父组件中绑定的非 Props 属性，`$listeners` 里存放的是父组件中绑定的非原生事件
 
 ```javascript
     //爷组件
@@ -282,6 +421,7 @@ this.$parent 子访问父
 
 //
 ```
+
 ```javascript
     //爷组件
     <div id="app">
@@ -300,8 +440,11 @@ this.$parent 子访问父
     </div>
     methods:{ toVal(){ this.$emit("setVal",this.msg) } }
 ```
+
 ### 兄弟组件
+
 通过eventBus来做中间的桥梁，传输方通过中间组件调用 emit 传数据，接收方通过on 接受数据，两者之间的自定义属性名保持一致。
+
 ```javascript
 // 传输方组件调用方式
 import Bus from '@/EventBus.js'
@@ -316,15 +459,20 @@ created() {
   })
 }
 ```
+
 ### 全局事件管理
+
 ### vuex
+
 ![](./img/2022-12-15-20-06-23.png)
 
 1. **State** 数据
+
 - 读取时最好在computed中
 - Vuex 通过 Vue 的插件系统将 store 实例从根组件中“注入”到所有的子组件里。
   - 子组件能通过 `this.$store.state` 访问到
   - 也可以使用`mapState`
+
     ``` javascript
     // 在单独构建的版本中辅助函数为 Vuex.mapState
     import { mapState } from 'vuex'
@@ -345,7 +493,9 @@ created() {
       })
     }
     ```
+
     与局部计算属性混合使用时用对象展开运算符
+
     ``` javascript
         computed: {
           localComputed () { /* ... */ },
@@ -355,9 +505,12 @@ created() {
           })
         }
     ```
+
 2. **Getter** 查询数据
+
 - Getter 接受 `state` 作为其第一个参数，也可以接受其他 `getters` 作为第二个参数
 - Getter 会暴露为 store.getters 对象，你可以以属性的形式访问这些值
+
     ```javascript
     const store = createStore({
       state: {
@@ -373,7 +526,9 @@ created() {
       }
     }) 
     ```
+
 - 你也可以通过让 getter 返回一个函数，来实现给 getter 传参。在你对 store 里的数组进行查询时非常有用。
+
     ```javascript
     getters: {
       // ...
@@ -384,7 +539,9 @@ created() {
 
     store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
     ```
+
 - mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性：
+
   ```javascript
     import { mapGetters } from 'vuex'
 
@@ -401,11 +558,14 @@ created() {
     }
     }
   ```
+
 3. **Mutations** 改动State的方法
+
 - 每个 mutation 都有一个字符串的事件类型 (type)和一个回调函数 (handler)。接受 state 作为第一个参数
 - 不能直接调用一个 mutation 处理函数。需要以相应的 type 调用 store.commit 方法
 - 一条重要的原则就是要记住 mutation 必须是**同步函数**。
 - 可以向 store.commit 传入额外的参数，即 mutation 的载荷（**payload**）：
+
     ```javascript
     mutations: {
     increment (state, n) {
@@ -457,9 +617,12 @@ created() {
     }
     }
     ```
+
 4. **Actions** 组件调用Mutations操作数据的动作
+
 - Action **提交的是 mutation**，而不是直接变更状态。
 - Action 可以包含任意**异步操作**。
+
     ```javascript
     const store = createStore({
       state: {
@@ -539,12 +702,15 @@ created() {
       }
     }
     ```
+
 ## 生命周期
+
 ![](./img/2022-12-17-11-05-07.png)
 TODO
 
 **组件生命周期**
 **Vue2.x：**
+
 - beforeCreate: 在组件实例初始化完成之后立即调用。实例初始化完成、props 解析之后、data() 和 computed 等选项处理之前
 - created: 响应式数据、计算属性、方法和侦听器设置完成。挂载阶段还未开始，因此 `$el` 属性仍不可用
 - beforeMount: 组件已经完成了其响应式状态的设置, 但还**没有创建 DOM 节点**
@@ -560,6 +726,7 @@ TODO
 - errorCaptured: 在捕获了后代组件传递的错误时调用。
 
 **Vue3.x：**
+
 - setup
 - onBeforeMount
 - onMounted
@@ -572,7 +739,6 @@ TODO
 - onErrorCaptured
 - onRenderTriggered: 在一个响应式依赖被组件触发了重新渲染之后调用。这个钩子仅在开发模式下可用，且在服务器端渲染期间不会被调用。
 - onRenderTracked
-
 
 **指令生命周期**
 
@@ -650,5 +816,5 @@ project
 ```
 
 ### SFC 单文件组件结构
-## 双向绑定
 
+## 双向绑定

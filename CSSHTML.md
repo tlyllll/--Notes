@@ -1,6 +1,21 @@
 
 # CSS
 
+## 覆盖问题
+```html
+<div class="red blue">123</div>
+<div class="blue red">123</div>
+```
+```css
+.red {
+    color: red
+}
+
+.blue {
+    color: blue
+}
+```
+两个都是蓝色! 和引用的顺序无关 和定义的顺序有关 后面的覆盖前面的
 ## 单位
 
 ### 绝对长度单位
@@ -10,8 +25,8 @@
 
 ### 相对长度单位
 
-- em: font-size：相对父元素 width 等：相对于自身的 font-size 自适应布局
-- rem: 相对于根元素的字体大小 移动端
+- em: 相对于当前元素或父元素的字体大小计算的。 如果当前文本没有设置字体尺寸则相对于默认的字体尺寸。即1em=16px
+- rem: 相对于根元素的字体大小
 - vw: 视窗宽度1%
 - vh: 视窗高度1% 高度自适应
 
@@ -247,14 +262,234 @@ float在英文中是“漂浮”的意思，它可以让元素漂浮并重新排
 2. 父元素触发**BFC**
 
 ### 盒子模型
-
+border-sizing:
 - border-box[IE盒子]：
   - width/height = content+padding+border
 - content-box[标准盒子]:
   - width/height = content
 
-### 水平/垂直居中 TODO
+### 水平/垂直居中 
+1. 父相对子绝对
+   这种方式通过设置各个方向的距离都是0，此时再讲margin设为auto，就可以在各个方向上居中了.缺点是需要知道子元素的宽高
+  ```css
+  .wp {
+      position: relative;
+  }
+  .box {
+      position: absolute;;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+  }
+  ```
+2. 行内元素
+  把box设置为行内元素，通过text-align就可以做到水平居中，但很多同学可能不知道通过通过vertical-align也可以在垂直方向做到居中，代码如下
+  ```css
+  /* 此处引用上面的公共代码 */
+  /* 此处引用上面的公共代码 */
 
+  /* 定位代码 */
+  .wp {
+      line-height: 300px;
+      text-align: center;
+      font-size: 0px;
+  }
+  .box {
+      font-size: 16px;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: initial;
+      text-align: left; /* 修正文字 */
+  }
+  ```
+3. flex
+  ```css
+    .wp {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  ``
+
+### 三栏布局【左右固定，中间自适应】
+1. 左右固定尺寸+float 中间margin
+  ```css
+  .left {
+    float: left;
+    width: 200px;
+    height: 200px;
+    background-color: aqua;
+  }
+  .right { 
+    float: right;
+    width: 200px;
+    height: 200px;
+    background-color: aquamarine;
+  }
+  .mid {
+    background-color: cadetblue;
+    height: 200px;
+    margin-left: 220px;
+    margin-right: 220px;
+  } 
+  ```
+  主要内容无法最先加载 ，当主要内容过多时影响用户体验
+2. BFC布局
+  我们先把左右两栏元素浮动，中间栏不做其他属性，发现中间栏默认撑满全屏，这时候我们就可以利用BFC不会和浮动元素重叠的规则，把中间元素改成一个BFC，使用overflow:hidden或者display: flex达到中间栏自适应
+  ```css
+   .left {
+    float: left;
+    width: 200px;
+    height: 200px;
+    background-color: aqua;
+    margin-right: 20px;
+     
+  }
+  .right { 
+    float: right;
+    width: 200px;
+    height: 200px;
+    background-color: aquamarine;
+    margin-left: 20px; 
+    
+  }
+  .mid {
+    background-color: cadetblue;
+    height: 200px;
+    overflow: hidden 
+    /* display: flex */
+  } 
+  ```
+3. position
+  1. 父元素使用相对定位
+  2. 两侧子元素使用绝对定位
+  3. 中间元素不做定位处理，只留出空间就好
+  ```css
+   .container {
+    position: relative;
+  }
+
+  .left {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    left: 0;
+    top: 0; 
+    background-color: aqua;
+  }
+
+  .right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-color: aquamarine;
+  }
+
+  .mid {
+    background-color: cadetblue;
+    height: 200px;
+	margin: 0 220px;
+  }
+  ```
+4. 圣杯布局
+   1. 三栏都使用float进行浮动，左右定宽，中间宽度100%
+   2. 使用负边距来调整让三栏位于一行，左栏设置margin-left为-100%，此时左栏位于第一行首部，然后将右栏的margin-left为其宽度的负值-200px，右栏也会移动到第一行中
+   3. 然后我们发现中间的元素宽度还是占满100%，所以被左右div挡住了，然后我们操作**父元素**给出和左右两栏相等的内边距
+   4. 再使用相对定位把左右两栏"拽"出来：通过left 、right值移动
+  ```css
+  .container {
+    margin-left: 200px;
+    margin-right: 200px;
+  }
+  .left {
+    float: left;
+    width: 200px;
+    height: 200px;
+    background-color: aqua;
+    margin-left: -100%;
+    position: relative;
+    left: -200px;
+  }
+  .mid {
+    float: left;
+    width: 100%;
+    height: 200px;
+    background-color: cadetblue;
+  }
+
+  .right {
+    float: left;
+    height: 200px;
+    width: 200px;
+    background-color: aquamarine;
+    margin-left: -200px;
+    position: relative;
+    right: -200px;
+  }
+  ```
+
+  ```html
+  <div class="container">
+    <div   class="mid">midmidmidmidmidmidmidmidmidmidmidmidmidmidmi dmidmidmidmidmidmidmidmidmidmidmid</div>
+    <div class="left">left</div>
+    <div class="right">right</div>
+  </div>
+  ```
+
+5. 双飞翼
+  双飞翼布局前两步和圣杯布局一样，只是处理中间栏部分内容被遮挡的问题解决方案不同：
+  在mian内部添加一个content，通过设置左右margin（左右两栏的宽度+间距margin）来避开遮挡
+    ```css
+  .left {
+    float: left;
+    width: 200px;
+    height: 200px;
+    background-color: aqua;
+    margin-left: -100%;
+  }
+  .mid {
+    float: left;
+    width: 100%;
+  }
+  .midContent {
+    height: 200px;
+    margin-left: 220px; // 左边距+间距
+    margin-right: 220px;// 右边距+间距
+    background-color: cadetblue;
+  }
+
+  .right {
+    float: left;
+    height: 200px;
+    width: 200px;
+    background-color: aquamarine;
+    margin-left: -200px;
+  }
+  ```
+
+  ```html
+  <div class="container">
+     <div class="mid">
+        <div class="midContent">
+          midmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmid
+        </div>
+    </div>
+    <div class="left">left</div>
+    <div class="right">right</div>
+  </div>
+  ```
+### 两栏布局【左固定，右自适应】 TODO
+https://blog.csdn.net/weixin_47750287/article/details/124565230
+
+### 一些题
+**Q1. z-index什么情况下会失效？**
+1. 父元素position为relative时，子元素的z-index失效。解决：父元素position改为absolute或static；
+2. 元素没有设置position属性为非static属性。解决：设置该元素的position属性为relative，absolute或是fixed中的一种；
+3. 元素在设置z-index的同时还设置了float浮动。解决：float去除，改为display：inline-block；
 ## BFC块级格式化上下文
 
 把 BFC 理解成一块独立的渲染区域，BFC 看成是元素的一种属性，当元素拥有了 BFC 属性后，这个元素就可以看做成隔离了的独立容器。
