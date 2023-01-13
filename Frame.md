@@ -1,13 +1,24 @@
 # vue
 
 是js框架
-
+const vm = new Vue()
 ## Vue.nextTick()
 
 当数据更新了，在dom中渲染后，自动执行该函数，
 
 Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.nextTick()的回调函数中，原因是在created()钩子函数执行的时候DOM 其实并未进行任何渲染，而此时进行DOM操作无异于徒劳，所以此处一定要将DOM操作的js代码放进Vue.nextTick()的回调函数中。与之对应的就是mounted钩子函数，因为该钩子函数执行时所有的DOM挂载已完成。
-
+## Options
+1. 数据
+   - data, props, propsData, computed, methods, watch
+2. DOM
+   - el 
+     - 挂载点
+     - 可以用$mount代替
+   - template
+   - render, renderError
+3. 生命周期钩子
+4. 资源
+   - directives, filters, components
 ## 监听
 
 ### computed
@@ -817,4 +828,275 @@ project
 
 ### SFC 单文件组件结构
 
-## 双向绑定
+## 虚拟DOM
+虚拟dom本质上是一个js对象，用来描述视图的**界面结构**，在vue中，每个组件都有一个`render`函数，每个render函数都会返回一个虚拟dom树，这意味着**每个组件都对应着一颗虚拟dom树**
+
+#### Q1. 为什么需要虚拟dom？
+在vue中，**渲染视图**会调用`render`函数
+
+这种渲染发生在
+1. 组件创建的时候
+2. 视图依赖的数据更新的时候
+   
+如果在渲染时，直接使用真实dom，由于真实dom的创建，更新，插入会带来大量的性能消耗，从而就会极大地降低渲染效率，因此，vue在渲染时，使用虚拟dom来替代真实dom主要是解决渲染效率的问题
+
+#### Q2. 虚拟dom是如何转换为真实dom的？
+每个组件实例首次被渲染时，首先会生成虚拟dom树，然后根据虚拟dom树创建真实dom，再把真实dom挂载到页面合适的地方，此时，**每个虚拟dom树对应一个真实dom**
+
+当组件受**响应式数据变化**的影响，需要重新渲染，就会重新调用render函数，**生成一个新的虚拟dom树**，然后用新的虚拟dom树跟旧的虚拟dom树做比较，**通过对比，vue会找到最小更新量**，然后**更新必要的虚拟dom节点**，其中用于比较的算法就叫 **Diff 算法**
+
+最后，这些更新过的虚拟dom节点，会去修改它们对应的真实dom，这样一来，就保证了真实dom的达到了最小的改动
+
+### Diff算法
+当组件发生更新时会重新执行 render 方法生成新的 vnode 节点，而当 新旧 vnode 都是 一组节点 时，为了以最小的性能开销完成 更新操作，需要比较两组子节点，其中用于比较的算法就叫 Diff 算法。
+
+#### 简单diff算法
+新旧 两组子节点的更新时，去遍历新旧子节点中**长度较短**的一组，目的是为了尽可能多的调用 `pacth` 函数进行更新
+
+##### 理想状态
+**理想状态** 指新旧一组节点中 新旧节点**前后位置**没有发生变化.
+
+在这个前提下新的一组节点可以比旧的一组子节点多、少或相等：
+- 取 新旧 一组节点的中 **较短** 的一组长度，作为**公共长度** `commonLength`
+- 通过以 `commonLength` 作为循环结束的条件，通过 `patch` 函数对当前遍历到的 新旧 进行 pacth **更新**操作
+- 若 新旧 一组节点的**长度一致**，那么意味着其**全部是 更新操作**
+- `commonLength` 长度后的，就代表是属于其他多余的节点，这个多余的节点会根据 新旧 的具体情况进行不同的处理：
+  - 新的 一组子节点有剩余，则代表有**新的节点需要 挂载**，通过 `patch` 函数进行挂载操作
+  - 旧的 一组子节点有剩余，则代表有**旧的节点需要 卸载**，通过 `unmount` 进行卸载操作
+
+##### 非理想状态
+非理想状态 指的是 新旧 一组子节点中相 **同位置** 的 **节点不相同.**
+
+简单 diff 算法仍然会以 `commonLength` 进行遍历，并通过 `patch(n1, n2)` 的方式去**更新**
+- !!但在 pacth 函数中由于 n1、n2 节点**不是相同节点**，此时会直接将 **旧节点** 进行 **卸载**，然后将 **新节点** 进行 **挂载** 操作，
+- 哪怕是当前 新旧 一组节点中在**不同位置**有相同的**节点可复用**，但**简单 diff 算法完全不知道**是否有可复用的节点，它完全是依赖于 pacth 来判断当前新旧节点是否是相同的节点。
+
+##### 小结
+显然，简单 diff 算法下可通过减少 DOM 操作的次数，提升了一定的更新性能，但在非理想状态下，其更新方式和简单直接的更新方式一致：即卸载旧节点、挂载新节点，这意味着它仍然有被优化的空间。
+
+#### 基于 key 的简单 diff 算法
+上述算法的缺陷在于 非理想状态 的 diff 的过程仍然比较固定，即只能比较同位置的节点是否一致，那么优化的方式也是显而易见，只需要引入 key 用来标识 新旧一组子节点中 是否存在相同 key 的节点，若存在则复用 真实 DOM 节点，即更新和移动 DOM 节点即可。
+
+- 通过**遍历 新的一组** 子节点中的节点，去 **旧的一组** 子节点中**基于 key 寻找**可复用的节点，找到可复用节点进行 **patch 更新**
+- 根据 lastIndex 决定是否要进行 移动
+- 当 **find 变量为 false【没找到】** 时认为当前节点是需要进行 **挂载**
+- 最后在通过 遍历旧节点，依次查找新节点中是否还存在，通过 has 变量判断是否需要进行 **卸载**
+
+#### 双端Diff
+同时对新旧两组子节点的两个端点进行比较的算法.
+
+**核心**：
+- 只要以下 四种假设，则可以直接通过 `patch()` 进行 **更新**
+  - 旧的头结点 等于 新的头结点，不需移动
+  - 旧的尾节点 等于 新的尾节点，不需移动
+  - 旧的头结点 等于 新的尾结点，需要移动
+  - 旧的尾节点 等于 新的头节点，需要移动
+- 若 不能命中 这四种假设，那么仍然需要**基于 key** 通过遍历找到 当前新节点 在 老的一组子节点 中的位置索引：
+  - 若在老的一组子节点中 找到 当前新节点
+    - 且 **是** 同一节点，则通过 pacth() 进行 **更新**
+    - 且 **不是** 同一节点（key 相同，但节点类型不同），则**视为新元素**，并进行 **挂载** 操作
+  - 若在老的一组子节点中 没有找到 当前新节点，则意味着当前新节点需要进行 **挂载** 操作
+- 当 老节点 或者 新节点 被遍历完了，就需要对剩余的节点进行操作：
+  - oldStartIdx > oldEndIdx 表示 **老节点遍历完成**，若 新节点有剩余，则说明剩余的节点是新增的节点，需要进行挂载 操作
+  - newStartIdx > newEndIdx 表示 **新节点遍历完成**，若 老节点有剩余，则说明剩余部分节点需要被删除，需要进行 卸载 操作 
+
+相当于先比较端点再进行key比较
+
+
+#### 快速 Diff 算法
+
+Vue.js 3 借鉴了 ivi 和 inferno 这两个框架中使用的算法：快速 Diff 算法，这个算法的性能优于 Vue.js 2 中所采用的 双端 Diff 算法.
+
+##### 节点预处理
+###### 前置节点
+通过开启一个 while 循环，**从前往后** 依次遍历新旧两组子节点：
+- 若当前新旧节点 相同，则通过 patch 进行 更新
+- 若当前新旧节点 不同，则终止循环，即前置节点处理结束
+
+###### 后置节点
+通过开启一个 while 循环，**从后往前** 依次遍历新旧两组子节点：
+
+- 若当前新旧节点 相同，则通过 patch 进行 更新
+- 若当前新旧节点 不同，则终止循环，即后置节点处理结束
+
+##### 处理剩余已知公共序列的节点
+
+当完成 节点预处理 后，很可能出现以下两种情况，而这些剩余节点是很容易根据已处理过的前后节点推断出它们的具体位置的：
+
+- 旧节点遍历完成，新节点有剩余，此时意味着有新节点需要挂载，通过 patch 将剩余新节点依次进行 挂载
+- 新节点遍历完成，旧节点有剩余，此时意味着有旧节点需要卸载，通过 unmount 将剩余旧节点依次进行 卸载
+
+##### 处理剩余未知序列的节点
+```
+旧节点：  [i ... e1 + 1]   =>   a b [c d e] f g
+新节点：  [i ... e2 + 1]   =>   a b [e d c h] f g
+当前索引： i = 2,  e1 = 4,  e2 = 5
+```
+其中，经过 节点预处理 后的剩余节点，即 [c d e] 和 [e d c h] 的部分是乱序的，针对这部分节点的处理是很关键的：
+- 通过 `toBePatched` 保存新节点的数量，即 `toBePatched = e2 - s2 + 1`
+- 基于 `newChildren` 的剩余节点，构造基一个形如 key: index 的 keyToNewIndexMap 索引映射，本质是一个 Map 对象
+- 遍历旧节点中，未处理的节点
+  - if keyToNewIndexMap.has(当前遍历的老节点) -> 通过patch更新并且通过 patched 记录下当前已 被更新/被复用 的节点数
+  - if !keyToNewIndexMap.has(当前遍历的老节点) -> 则说明当前的老节点通过 unmount 进行卸载
+  - if patched >= toBePatched，则说明**所有**剩余的新节点都已经在剩余旧节点中找到并**更新完成**，此时**需要对旧节点**中剩余老节点通过 unmount 进行**卸载**
+  - 若当前老节点对应新节点中的索引 小于 上一次记录的索引值，则说明当前节点需要**移动**，将 moved 变量标识为 true，便于后续基于 最长递增子序列 进行 移动 操作
+- 通过以上操作后，可以通过构造一个 **最长的稳定子序列** 用于后续节点的 移动 操作，即 最长递增子序列算法
+  - 通过构建 newIndexToOldIndexMap 数组，用于存储 **当前新节点** 在 **老节点中** 的**索引值**
+  - 基于 newIndexToOldIndexMap 数组通过 getSequence(newIndexToOldIndexMap) 得到最长递增子序列，其中相关算法感兴趣的可自行研究
+  - 从后往前 遍历，其中索引 i 指向新的一组子节点的最后一个节点，而索引 j 指向的是最长递增子序列中的最后一个元素
+    - 若当前新节点对应老节点中的索引为 0，则说明当前节点需要进行 **挂载**
+    - 若 moved 为 true 则说明当前新节点需要进行 **移动**
+
+## 2.xx与3.xx比较
+### 双向数据绑定原理不同
+- vue2：vue2的双向数据绑定是利用ES5的一个API `Object.defineProperty()` 对数据进行劫持，结合发布订阅模式的方式来实现的。
+  - 不能监听以下情况
+    - 数组
+      - 直接通过下标赋值  arr[i] = value
+      - 直接修改数组长度 arr.length = newLen
+    - 对象
+      - 属性的新增和删除
+      - obj.newKey=newValue
+      - delete obj.key
+  - 替代做法
+    - 数组
+      - arr.splice(index, 1, new)
+      - Vue.set(arr, index, newValue)
+      - arr.splice(newLen)  修改数组长度
+      - 调用数组的pop、push、shift、unshift、splice、sort、reverse等方法时是可以监听到数组的变化的vue内部相当于重写了数组的原型，劫持了这七个方法
+    - 对象
+      -  Vue.set(obj, newKey, newValue)
+      -  vm.$set(obj, newKey, newValue)
+      -  obj = Object.assign({}, obj, {newKey1: newValue1, newKey2: newValue2})
+      -  Vue.delete(obj, key)
+      -  vm.$delete(obj, key)
+   -  Object.defineProperty()针对的是对象的某个属性，而且这个操作在vue的**初始化阶段**就完成了，所以新增的属性无法监听，通过set方法新增对象就相当于初始化阶段的数据响应式处理
+
+- vue3：vue3中使用了ES6的`Proxy` API对数据代理。使用proxy的优势如下：
+    - defineProperty只能监听某个属性，不能对全对象监听
+    - vue 3是通过proxy直接代理整个对象来实现的，而不是像Object.defineProperty针对某个属性。所以，只需做一层代理就可以监听同级结构下的所有属性变化，包括新增属性和删除属性
+    - 可以省去for in，闭包等内容来提升效率(直接绑定整个对象即可)
+    - 可以监听数组，不用再去单独的对数组做特异性操作vue3.x可以检测到数组内部数据的变化。
+### 碎片
+vue2：vue2不支持碎片。
+
+vue3：vue3支持碎片（Fragments），就是说可以拥有多个根节点。
+### API类型
+vue2：vue2使用options api，选项型api在代码里分割了不同的属性
+  - methods，computed，watch，data中等等定义属性和方法，共同处理页面逻辑
+  - 一个功能需要在不同的vue配置项中定义属性和方法，比较**分散**，项目小还好，清晰明了，但是项目大了后，一个methods中可能包含20多个方法，你往往分不清哪个方法对应着哪个功能，这个是深有体会
+
+vue3：vue3使用Composition api，新的合成型api能让我们使用方法来分割，相比于旧的api使用属性来分组，这样代码会更加简便和整洁。提高**可读性**和**可维护性**
+  - 这样做，即时项目很大，功能很多，我们都能快速的定位到这个功能所用到的所有API，而不像vue2 Options API 中一个功能所用到的API都是分散的，需要改动功能，到处找API的过程是很费劲的。
+  - 基于函数组合的 API 更好的重用逻辑代码
+
+#### 定义数据变量和方法不同
+vue2：vue2是把数据放入data中，在vue2中定义数据变量是data(){}，创建的方法要在methods:{}中。
+
+vue3：，vue3就需要使用一个新的setup()方法，此方法在组件初始化构造的时候触发。使用以下三个步骤来建立反应性数据： 
+  - 从vue引入reactive；
+  - 使用reactive() 方法来声明数据为响应性数据；
+  - 使用setup()方法来返回我们的响应性数据，从而template可以获取这些响应性数据
+
+
+## 手写v-model
+```html
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>input双向绑定</title>
+</head>
+ 
+<body>
+  <input  type="text" id="input" />
+  <div id="box"></div>
+  <script>
+    let input = document.getElementById('input')
+    let box = document.getElementById('box')
+    var obj = {
+      targetValue:null
+    }
+    input.addEventListener('input', function (e) {
+      obj.targetValue = e.target.value
+      box.innerHTML=e.target.value
+    })
+    Object.defineProperty(obj, 'targetValue', {
+      get(val) {
+        return obj.targetValue = input.value
+      },
+      set(val) {
+        box.innerHTML=input.value = val
+      }
+    })
+ 
+  </script>
+</body>
+ 
+</html>
+```
+# React和Vue
+
+## 共同点
+### 1. 数据驱动视图
+而Vue和React 解决了这一痛点，采用数据驱动视图方式，隐藏操作DOM的频繁操作。所以我们在开发时，只需要关注数据变化即可，但是二者实现方式不尽相同。
+
+### 2.组件化
+React与Vue都遵循组件化思想，它们把注意力放在UI层，将页面分成一些细块，这些块就是组件，组件之间的组合嵌套就形成最后的网页界面。
+
+所以在开发时都有相同的套路，比如都有父子组件传递， 都有数据状态管理、前端路由、插槽等。
+
+### 3.虚拟DOM
+Vue与React都使用了 Virtual DOM + Diff算法
+- Vue的Template模板+options api写法
+- React的Class或者Function写法
+
+最后都是生成render函数，而render函数执行返回VNode(虚拟DOM的数据结构，本质上是棵树)。
+
+## 不同点
+### 核心思想
+- Vue
+  - 灵活易用的渐进式框架
+  - 进行数据拦截/代理,它对侦测数据的变化更敏感、更精确。
+- React
+  - 函数式编程（纯组件）
+  - 数据不可变
+  - 单向数据流
+
+### 组件写法
+- Vue
+  -  template 的单文件组件格式
+     - 即 html,css,JS 写在同一个文件(vue也支持JSX写法)
+- React
+  - JSX + inline style
+    - HTML 和 CSS 全都写进 JavaScript 中,即 all in js
+### diff算法
+#### React中diff
+1. react首先对新集合进行遍历，for( name in nextChildren)。
+
+2. 通过唯一key来判断老集合中是否存在**相同的节点。**
+   1. 如果**没有**的话**创建**
+   2. 如果**有**的话，if (preChild === nextChild )
+      1. 会将节点在新集合中的**位置**和在老集合中lastIndex进行比较
+      2. 如果if (child._mountIndex < lastIndex) 进行移动操作，否则不进行移动操作。
+
+3. 如果遍历的过程中，发现在新集合中没有，但在老集合中有的节点，会进行删除操作
+
+#### Vue中diff
+
+vue2.x采用双端diff
+vue3.x 加上了预处理
+
+### 响应式原理不同
+- Vue
+  - Vue依赖收集，自动优化，数据可变。
+  - Vue递归监听data的所有属性,直接修改。
+  - 当数据改变时，自动找到引用组件重新渲染。
+
+- React
+  - React基于状态机，手动优化，数据不可变，需要setState驱动新的state替换老的state。
+  - 当数据改变时，以组件为根目录，默认全部重新渲染, 所以 React 中会需要 shouldComponentUpdate 这个生命周期函数方法来进行控制
+

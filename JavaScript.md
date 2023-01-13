@@ -994,6 +994,34 @@ JS 有自动垃圾回收机制 ： 垃圾回收机制自动回收**不再使用*
 4. 闭包
    - 手动释放内存,设置为null 
 
+### 堆内存/栈内存
+**栈内存**：
+- 主要用于存储各种**基本类型**的变量
+  - 包括Boolean、Number、String、Undefined、Null，
+  - 以及**对象变量的指针**，
+  - 这时候栈内存给人的感觉就像一个线性排列的空间，每个小单元大小基本相等。
+- 堆内存主要负责像对象Object这种变量类型的存储
+
+**堆内存**：
+- 主要负责像**对象Object**这种变量类型的存储
+
+##### const
+当我们定义一个const对象的时候，我们说的常量其实是指针，就是const对象对应的堆内存指向是不变的，但是堆内存中的数据本身的大小或者属性是可变的。
+
+而对于const定义的基础变量而言，这个值就相当于const对象的指针，是不可变。
+
+知道了const在内存中的存储，那么const、let定义的变量不能二次定义的流程也就比较容易猜出来了，每次使用const或者let去初始化一个变量的时候，会首先遍历当前的内存栈，看看有没有重名变量，有的话就返回错误。
+
+##### new
+new的对象是放在堆里的，返回一个指针
+
+```javascript
+// a b相当于两个指针，指向的不同的堆内存中的对象
+var a = new String('123') 
+var b = new String('123')
+console.log(a==b, a===b)
+>>> false false
+```
 
 ## 存储问题
 ### localstorage/sessionstorage/cookies
@@ -1013,3 +1041,296 @@ Cookie、SessionStorage和LocalStorage都是存储在浏览器本地的
 
 6. 它们的应用场景也不同，Cookie一般用于存储登录验证信息SessionID或者token，LocalStorage常用于存储不易变动的数据，减轻服务器的压力，SessionStorage可以用来检测用户是否是刷新进入页面，如音乐播放器恢复播放进度条的功能。
 
+#### 普通使用
+```javascript
+//！！！基础变量
+// 当我们存基本变量时
+localStorage.setItem('基本变量', '这是一个基本变量')
+// 当我们取值时
+localStorage.getItem('基本变量')
+// 当我们删除时
+localStorage.removeItem('基本变量')
+
+//！！！引用变量
+// 当我们存引用变量时
+localStorage.setItem('引用变量', JSON.stringify(data))
+// 当我们取值时
+const data = JSON.parse(localStorage.getItem('引用变量'))
+// 当我们删除时
+localStorage.removeItem('引用变量')
+
+//清空
+localStorage.clear()
+```
+
+#### 命名规范
+1. 比如我们存用户信息会使用user作为 key 来存储
+2. 存储主题的时候用theme 作为 key 来存储
+3. 存储令牌时使用token作为 key 来存储
+其实这是很有问题的，咱们都知道，同源的两个项目，它们的localStorage是互通的。
+
+我举个例子吧比如我现在有两个项目，它们在同源https://www.sunshine.com下，这两个项目都需要往localStorage中存储一个 key 为name的值，那么这就会造成两个项目的name互相顶替的现象，也就是互相污染现象：
+
+```
+项目名 + 当前环境 + 项目版本 + 缓存key
+SUNSHINE_ADMIN_DEV_2.11_NAME
+```
+#### 时效性
+咱们都知道localStorage、sessionStorage这两个的生命周期分别是
+
+- localStorage：除非**手动清除**，否则一直存在
+- sessionStorage：生命结束于当前**标签页的关闭**或**浏览器的关闭**
+
+设置缓存key时，将value包装成一个对象，对象中有相应的时效时段，当下一次想获取缓存值时，判断有无超时，不超时就获取value，超时就删除这个缓存
+![](./img/2023-01-12-16-25-11.png)
+#### 隐秘性
+其实这个好理解，你们想想，当咱们把咱们想缓存的东西，存在localStorage、sessionStorage中，在开发过程中，确实有利于咱们的开发，咱们想看的时候也是一目了然，点击Application就可以看到。
+
+但是，一旦产品上线了，用户也是可以看到缓存中的东西的，而咱们肯定是会想：**有些东西可以让用户看到，但是有些东西我不想让你看到**
+
+加密很简单，直接使用crypto-js进行对数据的加密，使用这个库里的encrypt、decrypyt进行加密、解密
+## 跨域
+### 同源策略
+**同源策略**限制了从**同一个源加载的文档或脚本**如何与**来自另一个源的资源**进行交互。这是一个用于**隔离**潜在恶意文件的重要安全机制
+
+简单来说，在一个域名地址下的网页，如果请求一个受到同源策略限制的另一个域名地址接口的时候，就会报错
+
+同源策略不仅仅是浏览器这边做了限制，在服务端也是有限制的
+
+>同源： 协议、主机、端口 一致
+
+### JSONP
+#### `src`和`href`属性
+HTML的标签中有一个属性是可以请求外部地址的，那就是src和href属性。可以请求外部地址的js或者css，请求cdn服务器上的公共资源，并且不会出现问题，所以根据src的这一个特性，优秀的工程师们想到一个解决跨域的办法，俗称JSONP。
+
+主要思路是生成一个`<script>`标签，里头src属性赋值为要请求的文件/资源
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSONP</title>
+  <script>
+    function print(data) {
+      console.log(`我叫${data.name}`);
+      console.log(`我今年${data.age}岁`);
+      let jsonpScript = document.getElementsByClassName('jsonpScript')[0];
+      document.body.removeChild(jsonpScript);
+    }
+    function jsonpRequest(callback) {
+      let jsonpScript = document.createElement('script');
+      jsonpScript.src = `http://www.zhanwuzha.com/jsonp/js/index.js?callback=${callback}`;
+      jsonpScript.className = 'jsonpScript';
+      document.body.appendChild(jsonpScript);
+    }
+  </script>
+</head>
+<body>
+  <button onclick="jsonpRequest('print')">发个JSONP请求</button>
+</body>
+</html>
+```
+
+```javascript
+// jsonp/js/index.js
+print({
+    name: '前端战五渣',
+    age: 18
+  })
+
+```
+其实JSONP并不算真正意义上的AJAX请求，只是**请求了一个js文件并且执行**了，而且这种跨域方法只能进行**GET请求**
+
+### CORS[跨域资源共享]
+它允许浏览器向跨源服务器，发出 `XMLHttpRequest` 请求，从而克服了`AJAX`只能同源使用的限制。
+
+#### 简单请求
+只要满足以下条件的请求，就属于简单请求
+1. 请求方法为**HEAD**、**GET**或者**POST**中的一种 
+2. HTTP的头信息不超过以下几种字段Accept、Accept-Language、Content-Language、Last-Event-ID以及Content-Type的值只限于application/x-www-form-urlencoded、multipart/form-data、text/plain三个
+
+对于简单请求来说，从浏览器发出请求的时候，浏览器会自动在请求头中添加一个字段Origin，值为发出请求网页的源地址
+
+![](https://pic3.zhimg.com/80/v2-a30a1883fcbf07f8c7d86e9b73511186_1440w.webp)
+
+- 如果`Origin`的值**不在指定**的许可范围
+   - 服务端返回一个正常的HTTP回应。
+     - 这个回应的头信息没有包含`Access-Control-Allow-Origin`字段，就知道出错了，从而抛出一个错误，被`XMLHttpRequest`的`onerror`回调函数捕获。
+     - 注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。 
+- 如果`Access-Control-Allow-Origin`字段正好跟带过去的`Origin`的**值一样**，则返回对应的数据，完成一次请求。
+
+总的来说，CORS实现跨域的方法就是根据**请求头**的`Origin`值和**响应头**的`Access-Control-Request-Headers`和`Access-Control-Request-Method`的值进行比对，通过了就可以请求成功，没通过就请求失败。
+#### 非简单请求
+非简单请求是那种对服务器有特殊要求的请求，比如请求方法是**PUT**或**DELETE**，或者`Content-Type`字段的类型是`application/json`。
+#### option请求
+在进行非简单请求之前，浏览器会在正式请求之前发送一次**预检请求**，这就是有时候我们会在控制台中看到的**option请求**，就是说，正式请求之前，浏览器会去问服务端我这个地址能不能访问你，如果可以，浏览器才会发送正式的请求，否则报错。
+
+## Ajax
+AJAX代表异步JavaScript和XML。
+
+它是一组用于**异步显示数据**的相关技术。换句话说，它在不重新加载网页的情况下**发送和检索数据**。
+
+```javascript
+// 原生js
+//创建 XMLHttpRequest 对象
+var ajax = new XMLHttpRequest();
+//规定请求的类型、URL 以及是否异步处理请求。
+ajax.open('GET',url,true);
+//发送信息至服务器时内容编码类型
+ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
+//发送请求
+ajax.send(null);  
+//接受服务器响应数据
+ajax.onreadystatechange = function () {
+    if (obj.readyState == 4 && (obj.status == 200 || obj.status == 304)) { 
+    }
+};
+```
+```javascript
+// jQuery
+$.ajax({				//交互方式 $.get，$.post，$.getJSON
+	async:				//请求同步异步，默认true异步
+	type:				//请求类型：GET/POST				
+	url:				//请求的网站地址
+	data:				//提交的数据，参数
+	contentType:		//请求的MIME媒体类型：application/x-www-form-urlencoded（默认）、application/json;charset=UTF-8
+	dataType:			//服务器返回MIME类型：xml/html/script/json/jsonp
+	success: function(data){	//请求成功，回调函数，data封装网站返回的数据
+		console.log( data );
+	},
+	error: function(e){		//请求失败回调函数，e封装错误信息
+		console.log(e.status);			//状态码
+		console.log(e.responseText);	//错误信息
+	}
+})
+
+```
+### XMLHttpRequest的属性
+- `onReadyStateChange` - 只要readystate属性发生变化，就会调用它。
+- `readyState` - 表示请求的状态。
+- `responseText` - 它将响应作为文本返回。
+- `responseXML` - 它以XML格式返回响应。
+- `status` - 返回请求的状态编号。
+- `statusText` - 返回状态的详细信息。
+
+### XMLHttpRequest的重要方法是什么？
+- `abort()` - 用于取消当前请求。
+- `getAllResponseHeaders()` - 返回标题详细信息。
+- `getResponseHeader()` - 返回特定的标题详细信息。
+- `open()` - 用于打开请求。
+  - `open(method,URL)` - 它打开指定get或post方法和URL的请求。
+  - `open(method,URL,async)` - 它与上面相同但是指定异步或不指定。
+  - `open(method,URL,async,userName,password)` - 与上面相同，但指定用户名和密码。
+- `send()` - 用于发送请求。
+  - `send()` - 它发送get请求
+  - `send(string)` - 发送帖子请求。
+- `setRequestHeader()` - 它添加了请求标头。
+### AJAX有哪些安全问题？
+- AJAX源代码是可读的
+- 攻击者可以将脚本插入系统
+
+### axios
+Vue中封装了ajax并增强了它，在异步并发处理优于原生ajax。称为：axios（ajax input output system）
+
+```javascript
+//get请求方式一：
+axios({
+		// 默认请求方式为get
+		method: 'get',
+		url: 'api',
+		// 传递参数
+		params: {
+			key: value
+		},
+		// 设置请求头信息
+		headers: {
+			key: value
+		}
+		responseType: 'json'
+	}).then((response) => {
+		// 请求成功
+		let res = response.data;
+		console.log(res);
+	}).catch((error) => {
+		// 请求失败，
+		console.log(error);
+});
+//get请求方式二：
+axios.get("api", {
+	// 传递参数
+	params: {
+		key: value
+	},
+    // 设置请求头信息，可以传递空值
+	headers: {
+		key: value
+	}
+}).then((response) => {
+	// 请求成功
+	let res = response.data;
+	console.log(res);
+}).catch(error => {
+	// 请求失败，
+	console.log(error);
+});
+
+//post请求方式一：
+// 注：post请求方法有的要求参数格式为formdata格式，此时需要借助 Qs.stringify()方法将对象转换为字符串
+let obj = qs.stringify({
+	key: value
+});
+axios({
+	method: 'post',
+	url: 'api',
+	// 传递参数
+	data: obj,
+	// 设置请求头信息
+	headers: {
+		key: value
+	},
+	responseType: 'json'
+}).then((response )=> {
+	// 请求成功
+	let res = response.data;
+	console.log(res);
+}).catch(error => {
+	// 请求失败，
+	console.log(error);
+});
+//post请求方式二：
+let data = {
+	key: value
+},
+headers = {
+	USERID: "",
+	TOKEN: ""
+};
+// 若无headers信息时，可传空对象占用参数位置
+axios.post("api", qs.stringify(data), {
+	headers
+}
+}).then((response) => {
+	// 请求成功
+	let res = response.data;
+	console.log(res);
+}).catch((error) => {
+	// 请求失败，
+	console.log(error);
+});
+```
+
+- post请求的时候参数通过data进行传递
+- get请求的时候参数通过params进行传递
+
+>axios请求头的 Content-Type 默认是 application/json，而postman默认的是 application/x-www-form-urlencoded。
+
+axios 是一个基于Promise 用于浏览器和 nodejs 的 HTTP 客户端，本质上也是对原生XHR的封装，只不过它是Promise的实现版本，符合最新的ES规范，它本身具有以下特征：
+从浏览器中创建 XMLHttpRequest
+- 支持 Promise API
+- 客户端支持防止CSRF
+  - 就是让你的每个请求都带一个从cookie中拿到的key，根据浏览器同源策略，假冒的网站是拿不到你cookie中得key的，这样，后台就可以轻松辨别出这个请求是否是用户在假冒网站上的误导输入，从而采取正确的策略。
+- 提供了一些并发请求的接口（重要，方便了很多的操作）
+- 从 node.js 创建
+- http 请求 拦截请求和响应 转换请求和响应数据 取消请求
+- 自动转换JSON数据
