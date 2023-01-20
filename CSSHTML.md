@@ -520,7 +520,36 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 3. position为absolute或fixed
 4. display为inline-block, table-cell, table-caption, flex, inline-flex
 5. overflow不为visible
+## 新特性
+### 伪类:has
+`a:has(span) // 只会匹配包含 span 子元素的 a 元素：`
+### 级联层（Cascade Layers）
 
+有时候当我们想要**覆盖组件原来的样式**来应用我们自定义的样式时，一般情况下我们会采用**优先级更高的样式名**来进行覆盖（或ID选择器或嵌套很多层），有时候又不得不应用`!important` ，这样很容易造成样式的混乱，不好管理。
+
+级联层的诞生就是为了解决上述问题，它可以让CSS样式**按照我们定义好的级联顺序展示**，起到控制不同样式间的优先级的作用。
+使用方法
+```less
+@layer A, B, C;
+
+@layer A {
+  div {
+    background-color: red;
+  }
+}
+
+@layer B {
+  #app {
+    background-color: blue;
+  }
+}
+
+@layer C {
+  div {
+    background-color: green;
+  }
+}
+```
 # HTML
 
 ## 标签属性
@@ -570,3 +599,4 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 - 回流会导致页面重排，影响性能
 
 
+## meta

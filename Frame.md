@@ -19,6 +19,37 @@ Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.next
 3. 生命周期钩子
 4. 资源
    - directives, filters, components
+
+### 为什么data是函数？
+1. 防止data复用：vue中组件是用来复用的，为了防止data复用，将其定义为函数。
+2. data独立性：vue组件中的data数据都应该是相互隔离，互不影响的，组件每复用一次，data数据就应该被复制一次，之后，当某一处复用的地方组件内data数据被改变时，其他复用地方组件的data数据不受影响，就需要通过data函数返回一个对象作为组件的状态。
+3. 作用域；
+4. js的特性。
+
+总结来说，如果data是一个函数的话，这样每复用一次组件，就会返回一份新的data(类似于给每个组件实例创建一个私有的数据空间，让各个组件实例维护各自的数据)。
+
+当使用组件时，我们希望vue组件中的data数据都是互相隔离互不影响的。组件每复用一次，data数据就应该被复制一次。当我们将组件中的data写成一个函数，数据以函数返回值形式定义。这样每复用一次组件，就会返回一份新的data，拥有自己的作用域。
+
+但是当我们组件的data单纯的写成对象形式，这些实例用的是同一个构造函数，由于JavaScript的特性所导致，所有的组件实例共用了一个data，就会造成一个变了全都会变的结果。
+
+## keep-alive
+![keep-alive文档](https://v2.cn.vuejs.org/v2/api/#keep-alive)
+设计有A、B、C三个页面，试想这样一个场景需求：
+
+- 离开B页面进入C页面，缓存B页面数据（keepAlive: true）
+- 离开B页面进入A页面，不缓存B页面数据（keepAlive: false)
+
+keep-alive 包裹动态组件时，会缓存不活动的组件实例，而不是销毁它们。和 transition 相似，keep-alive 是一个抽象组件：它自身不会渲染一个 DOM 元素，也不会出现在父组件链中。
+
+当组件在 `<keep-alive> `内被切换，它的 activated 和 deactivated 这两个生命周期钩子函数将会被对应执行。
+
+- Props：
+  - include - 字符串或正则表达式。只有名称匹配的组件会被缓存。
+  - exclude - 字符串或正则表达式。任何名称匹配的组件都不会被缓存。
+  - max - 数字。最多可以缓存多少组件实例。
+
+![keep-alive使用实例](https://zhuanlan.zhihu.com/p/372621917)
+
 ## 监听
 
 ### computed
@@ -830,6 +861,25 @@ project
 
 ## 虚拟DOM
 虚拟dom本质上是一个js对象，用来描述视图的**界面结构**，在vue中，每个组件都有一个`render`函数，每个render函数都会返回一个虚拟dom树，这意味着**每个组件都对应着一颗虚拟dom树**
+
+### render函数
+render函数的作用就是返回一个虚拟dom，将该虚拟dom渲染成真实的dom
+
+返回的参数是Vnode：即虚拟节点，也就是我们要渲染的节点
+
+createElement是render函数返回的参数，它本身也是一个函数，并且有3个参数：
+
+1. 第一个参数（必填）：可以为String|Object|Function
+  - String：表示的是**HTML 标签名**；
+  - Object ：一个含有数据的**组件选项对象**；
+  - Function ：返回了一个含有标签名或者组件选项对象的async函数。
+2. 第二个参数（选填）：可为Class|Style|attrs|domProps|on
+  - class：控制类名；
+  - style ：样式；
+  - attrs ：用来写正常的 html 属性 id src 等；
+  - domProps ：用来写原生的dom 属性；
+  - on：用来写原生方法；
+3. 第三个参数（选填）：代表**子级虚拟节点**，由 createElement() 构建而成，正常来讲接收的是一个字符串或者一个数组，一般数组用的是比较多的
 
 #### Q1. 为什么需要虚拟dom？
 在vue中，**渲染视图**会调用`render`函数

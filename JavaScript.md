@@ -510,6 +510,28 @@ Promise 本身是同步的立即执行函数， 当在 executor 中执行 resolv
   - 如果不设置回调函数，内部的错误不会反应到外部
   - 当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。
 
+#### Promise 相关代码题
+```javascript
+new Promise((resolve) => {
+  console.log(1)
+  resolve()
+}).then(() => {
+  new Promise((resolve) => {
+    console.log(2)
+    resolve()
+  }).then(() => {
+    console.log(4)
+  })
+}).then(() => {
+  console.log(3)
+})
+//1243
+```
+**关键点：**
+1. promise.then(onFulfilled, onRejected)
+2. .then可以在同一个 promise 上多次调用。
+   1. 第一个 then() 方法调用后，会返回一个新的 Promise。
+   2. 这样做的目的就是为了保持链式调用，而且 then() 方法内的 onFulfilled 回调会等待 Promise 状态修改之后才会调用。
 ### 宏任务/微任务
 - macro-task(宏任务)：包括**整体代码**script，setTimeout，setInterval
 - micro-task(微任务)：Promise，process.nextTick
@@ -537,7 +559,7 @@ async function test() {
     await getAsyncContent()
     return 2
 }
-相当于
+//相当于
 function test() {
     return Promise.resolve().then(() => {
         let a = 2
@@ -893,7 +915,11 @@ function throttle(fn,delay){
     }
 }
 ```
-
+## 数据结构
+### Set集合
+### Map
+having和where区别
+exist 和 in的区别
 ## 数组操作
 
 ### for
@@ -911,15 +937,59 @@ function throttle(fn,delay){
        - arguments对象
        - Nodelist对象, 就是获取的dom列表集合
 
-1. for..in(ES5):
+2. for..in(ES5):
    - 适用于**遍历对象**而产生的，不适用于遍历数组。
    - 只能获得对象的**键名**，不能获得键值
    - 会遍历整个对象的原型链；
    - 返回数组中所有可枚举的属性名；
 
-2. forEach
+3. forEach
    - 无法中途跳出，`break` 命令或 `return` 命令都不能奏效
+   - 总是返回undefined
+   - 对数组的每个元素执行一次提供的函数。
+  ```javascript
+    array.forEach(function(element) {
+      console.log(element);
+    });
+    //语法
+    array.forEach(function(value,index,array){
+  　　　//code something
+  　});
+  ```
+### map()
+原数组中的每个元素调用一个指定方法后，返回返回值组成的新数组。
+```javascript
+function pow(x){  //定义一个平方函数
+    return x*x;
+}
 
+var arr=[1,2,3,4,5,6,7,8,9];
+var result = arr.map(pow);  //map()传入的是函数对象本身
+console.log(result);       //结果：[1,4,9,16,25,36,49,64,81];
+```
+### reduce()
+为数组中的每一个元素依次执行回调函数（不包括数组中被删除或从未被赋值的元素），返回一个具体的结果。
+```javascript
+[x1, x2, x3, x4].reduce(f) = f(f(f(x1, x2), x3), x4)
+
+//语法
+arr.reduce(callback,[initialValue])
+```
+- callback （执行数组中每个值的函数，包含四个参数）
+  - previousValue （第一项的值或者上一次叠加的结果值，或者是提供的初始值  - （initialValue））
+  - currentValue （数组中当前被处理的元素）
+  - index （当前元素在数组中的索引）
+  - array （数组本身）
+- initialValue （作为第一次调用 callback 的第一个参数，可以控制返回值的格式）
+
+```javascript
+var  arr = [1, 2, 3, 4, 5];
+sum = arr.reduce(function(prev, cur, index, arr) {
+    console.log(prev, cur, index);   //输出的是第一项的值或上一次叠加的结果，正在被处理的元素，正在被处理的元素的索引值
+    return prev + cur;
+})
+console.log(arr, sum); //输入数组本身和最后的结果
+```
 ### 常见操作
 
 |  方法   | 参数/使用 [可选] | 作用  |
@@ -1334,3 +1404,4 @@ axios 是一个基于Promise 用于浏览器和 nodejs 的 HTTP 客户端，本�
 - 从 node.js 创建
 - http 请求 拦截请求和响应 转换请求和响应数据 取消请求
 - 自动转换JSON数据
+
