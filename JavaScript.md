@@ -920,6 +920,13 @@ function throttle(fn,delay){
 ### Map
 having和where区别
 exist 和 in的区别
+
+### WeakMap
+有点像c++中的weak_pointer
+
+- 不影响引用计数
+- 无法遍历
+- 键的类型必须是引用对象【当外部对此引用对象的引用计数为0时自动被垃圾回收】
 ## 数组操作
 
 ### for
