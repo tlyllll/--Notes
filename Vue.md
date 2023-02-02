@@ -1,3 +1,4 @@
+![](./img/2023-02-02-16-08-45.png)
 # vue
 
 是js框架
@@ -1149,4 +1150,113 @@ vue3.x 加上了预处理
 - React
   - React基于状态机，手动优化，数据不可变，需要setState驱动新的state替换老的state。
   - 当数据改变时，以组件为根目录，默认全部重新渲染, 所以 React 中会需要 shouldComponentUpdate 这个生命周期函数方法来进行控制
+
+# Vue-Router
+```javascript
+// 1. 定义路由组件.
+// 也可以从其他文件导入
+const Home = { template: '<div>Home</div>' }
+const About = { template: '<div>About</div>' }
+
+// 2. 定义一些路由
+// 每个路由都需要映射到一个组件。
+// 我们后面再讨论嵌套路由。
+const routes = [
+  { path: '/', component: Home },
+  { path: '/about', component: About },
+]
+
+// 3. 创建路由实例并传递 `routes` 配置
+// 你可以在这里输入更多的配置，但我们在这里
+// 暂时保持简单
+const router = VueRouter.createRouter({
+  // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
+  history: VueRouter.createWebHashHistory(),
+  routes, // `routes: routes` 的缩写
+})
+
+// 5. 创建并挂载根实例
+const app = Vue.createApp({})
+//确保 _use_ 路由实例使
+//整个应用支持路由。
+app.use(router)
+
+app.mount('#app')
+
+// 现在，应用已经启动了！
+```
+
+### `$router`和`$route`的区别
+
+`$router`是用来**操作路由**，`$route`是用来**获取路由信息**
+
+通过调用 `app.use(router)`，我们可以在任意组件中以 `this.$router` 的形式**访问**它，并且以 `this.$route` 的形式**访问当前路由**：
+
+`this.$router` 与直接使用通过 `createRouter` 创建的 `router` 实例完全相同。我们使用 `this.$router` 的原因是，我们不想在每个需要操作路由的组件中都导入路由。
+
+#### `$router`使用
+```javascript
+//常规跳转连接方法
+this.$router.push("/login");
+//使用对象的形式 不带参数
+this.$router.push({ path:"/login" });
+//使用对象的形式，参数为地址栏上的参数
+this.$router.push({ path:"/login",query:{username:"jack"} }); 
+//使用对象的形式 ，参数为params 不会显示在地址栏
+//但是要注意：如果提供了 path， params 会被忽略
+this.$router.push({ name:'user' , params: {id:123} });
+
+//在 history 记录中向前或者后退多少步，类似window.history.go(n)
+this.$router.go(n)
+
+//想要导航到不同的 URL，则使用 router.push 方法。这个方法会向 history栈添加一个新的记录，
+//所以，当用户点击浏览器后退按钮时，则回到之前的 URL。
+this.$router.push("/login");
+
+//router.replace(location) 跟 router.push 很像，唯一的不同就是，它不会向 history添加新记录，而是跟它的方法名一样 —— 替换掉当前的 history 记录。
+this.$router.replace(location)
+```               
+##### query和param
+1. 传参可以使用params和query两种方式。
+2. 使用`params`传参只能用`name`来引入路由，即`push`里面只能是`name:’xxxx’`,不能是`path:’/xxx’`,因为`params`只能用name来引入路由，如果这里写成了`path`，接收参数页面会是`undefined！！！`。
+3. 使用 `query` 传参使用 `path` 来引入路由。
+4. params是路由的一部分,必须要在路由后面添加参数名。query是**拼接在url**后面的参数，没有也没关系。
+5. 二者还有点区别，直白的来说query相当于get请求，页面跳转的时候，可以在地址栏看到请求参数，而params相当于post请求，参数不会再地址栏中显示
+
+#### `$route`使用
+```javascript
+//主要的属性有：
+//字符串，等于当前路由对象的路径，会被解析为绝对路径，如/home/ews
+this.$route.path 
+ 
+//对象，包含路由中的动态片段和全匹配片段的键值对，不会拼接到路由的url后面
+this.$route.params 
+ 
+//对象，包含路由中查询参数的键值对。会拼接到路由url后面
+this.$route.query 
+ 
+//路由规则所属的路由器
+this.$route.router
+ 
+//当前路由的名字，如果没有使用具体路径，则名字为空
+this.$route.name 
+
+//数组，包含当前匹配的路径中所包含的所有片段所对应的配置参数对象。
+this.$route.matched
+```
+## 使用路由守卫进行权限管理
+### 完整的导航解析流程
+1. 导航被触发。
+2. 在失活的组件里调用 beforeRouteLeave 守卫。
+3. 调用全局的 beforeEach 守卫。
+4. 在重用的组件里调用 beforeRouteUpdate 守卫(2.2+)。
+5. 在路由配置里调用 beforeEnter。
+6. 解析异步路由组件。
+7. 在被激活的组件里调用 beforeRouteEnter。
+8. 调用全局的 beforeResolve 守卫(2.5+)。
+9. 导航被确认。
+10. 调用全局的 afterEach 钩子。
+11. 触发 DOM 更新。
+12. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+
 

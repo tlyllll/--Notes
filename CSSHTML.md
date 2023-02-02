@@ -1,4 +1,4 @@
-
+![](./img/2023-02-02-16-07-45.png)
 # CSS
 
 ## 覆盖问题
@@ -600,3 +600,31 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 
 
 ## meta
+标签提供关于 HTML 文档的元数据。它不会显示在页面上，但是对于机器是可读的。
+
+### 必需属性content
+meta的必需属性是content，当然并不是说meta标签里一定要有content，而是当有http-equiv或name属性的时候，一定要有content属性对其进行说明。例如：
+```html
+<meta name="keywords" content="HTML,ASP,PHP,SQL">
+```
+
+这里面content里的属性就是对keywords进行的说明，所以呢也可以理解成一个键值对吧，就是
+
+```JSON
+{keywords:"HTML,ASP,PHP,SQL"}
+```
+### 可选属性
+#### http-equiv
+添加http头部内容，对一些自定义的，或者需要额外添加的http头部内容，需要发送到浏览器中，我们就可以是使用这个属性
+
+也可重定向
+
+```html
+<meta http-equiv="Refresh" content="5;url=http://blog.yangchen123h.cn" />
+```
+#### name
+这个属性是供浏览器进行解析，对于一些浏览器兼容性问题，name属性是最常用的，当然有个前提就是浏览器能够解析你写进去的name属性才可以，不然就是没有意义的。还是举个例子吧:
+```html
+<meta name="renderer" content="webkit">
+```
+这个meta标签的意思就是告诉浏览器，用webkit内核进行解析，当然前提是浏览器有webkit内核才可以，不然就是没有意义的啦。当然看到这个你可能会有疑问，这个renderer是从哪里冒出来的，我要怎么知道呢？这个就是在对应的浏览器的开发文档里就会有表明的。

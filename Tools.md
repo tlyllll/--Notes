@@ -1,8 +1,12 @@
+![](./img/2023-02-02-16-09-06.png)
 # Webpack
-![文档](https://webpack.docschina.org/concepts/modules/)
+(https://webpack.docschina.org/concepts/modules/)
 本质上，webpack是一个用于现代 JavaScript 应用程序的静态模块打包工具
 
-当 webpack处理应用程序时，它会在内部从一个或多个入口点构建一个依赖图（dependency graph），然后将你项目中所需的每一个模块组合成一个或多个 bundles，它们均为静态资源，用于展示你的内容
+当 webpack处理应用程序时，它会在内部从一个或多个入口点构建一个依赖图（dependency graph），然后将你项目中所需的每一个模块组合成一个或多个 bundles，它们均为静态资源，用于展示你的内容。Webpack认为一切都是模块，JS文件、CSS文件、jpg/png图片等等都是模块。
+
+通俗来讲：找出模块之间的依赖关系，按照一定的规则把这些模块组织合并为一个JavaScript文件。
+
 
 ![](./img/2023-01-20-13-51-59.png)
 ## loader
