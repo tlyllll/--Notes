@@ -365,6 +365,7 @@ code {
           : 'default'
     });
   </script>
+<p><img src="./img/2023-02-02-16-08-18.png" alt=""></p>
 <h1 id="js">js</h1>
 <h2 id="%E5%8E%9F%E5%9E%8B%E9%93%BE">原型链</h2>
 <p><img src="./img/2022-12-17-11-28-33.png" alt=""></p>
@@ -901,6 +902,32 @@ sleep(<span class="hljs-number">10000000</span>)
 <li>如果不设置回调函数，内部的错误不会反应到外部</li>
 <li>当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。</li>
 </ul>
+<h4 id="promise-%E7%9B%B8%E5%85%B3%E4%BB%A3%E7%A0%81%E9%A2%98">Promise 相关代码题</h4>
+<pre class="hljs"><code><div><span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>)
+  resolve()
+}).then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>)
+    resolve()
+  }).then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">4</span>)
+  })
+}).then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>)
+})
+<span class="hljs-comment">//1243</span>
+</div></code></pre>
+<p><strong>关键点：</strong></p>
+<ol>
+<li>promise.then(onFulfilled, onRejected)</li>
+<li>.then可以在同一个 promise 上多次调用。
+<ol>
+<li>第一个 then() 方法调用后，会返回一个新的 Promise。</li>
+<li>这样做的目的就是为了保持链式调用，而且 then() 方法内的 onFulfilled 回调会等待 Promise 状态修改之后才会调用。</li>
+</ol>
+</li>
+</ol>
 <h3 id="%E5%AE%8F%E4%BB%BB%E5%8A%A1%E5%BE%AE%E4%BB%BB%E5%8A%A1">宏任务/微任务</h3>
 <ul>
 <li>macro-task(宏任务)：包括<strong>整体代码</strong>script，setTimeout，setInterval</li>
@@ -927,7 +954,7 @@ sleep(<span class="hljs-number">10000000</span>)
     <span class="hljs-keyword">await</span> getAsyncContent()
     <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>
 }
-相当于
+<span class="hljs-comment">//相当于</span>
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
         <span class="hljs-keyword">let</span> a = <span class="hljs-number">2</span>
@@ -1276,6 +1303,18 @@ show(fn);
     }
 }
 </div></code></pre>
+<h2 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">数据结构</h2>
+<h3 id="set%E9%9B%86%E5%90%88">Set集合</h3>
+<h3 id="map">Map</h3>
+<p>having和where区别
+exist 和 in的区别</p>
+<h3 id="weakmap">WeakMap</h3>
+<p>有点像c++中的weak_pointer</p>
+<ul>
+<li>不影响引用计数</li>
+<li>无法遍历</li>
+<li>键的类型必须是引用对象【当外部对此引用对象的引用计数为0时自动被垃圾回收】</li>
+</ul>
 <h2 id="%E6%95%B0%E7%BB%84%E6%93%8D%E4%BD%9C">数组操作</h2>
 <h3 id="for">for</h3>
 <ol>
@@ -1315,9 +1354,54 @@ show(fn);
 <p>forEach</p>
 <ul>
 <li>无法中途跳出，<code>break</code> 命令或 <code>return</code> 命令都不能奏效</li>
+<li>总是返回undefined</li>
+<li>对数组的每个元素执行一次提供的函数。</li>
 </ul>
 </li>
 </ol>
+<pre class="hljs"><code><div>  array.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">element</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(element);
+  });
+  <span class="hljs-comment">//语法</span>
+  array.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">value,index,array</span>)</span>{
+　　　<span class="hljs-comment">//code something</span>
+　});
+</div></code></pre>
+<h3 id="map">map()</h3>
+<p>原数组中的每个元素调用一个指定方法后，返回返回值组成的新数组。</p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pow</span>(<span class="hljs-params">x</span>)</span>{  <span class="hljs-comment">//定义一个平方函数</span>
+    <span class="hljs-keyword">return</span> x*x;
+}
+
+<span class="hljs-keyword">var</span> arr=[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">6</span>,<span class="hljs-number">7</span>,<span class="hljs-number">8</span>,<span class="hljs-number">9</span>];
+<span class="hljs-keyword">var</span> result = arr.map(pow);  <span class="hljs-comment">//map()传入的是函数对象本身</span>
+<span class="hljs-built_in">console</span>.log(result);       <span class="hljs-comment">//结果：[1,4,9,16,25,36,49,64,81];</span>
+</div></code></pre>
+<h3 id="reduce">reduce()</h3>
+<p>为数组中的每一个元素依次执行回调函数（不包括数组中被删除或从未被赋值的元素），返回一个具体的结果。</p>
+<pre class="hljs"><code><div>[x1, x2, x3, x4].reduce(f) = f(f(f(x1, x2), x3), x4)
+
+<span class="hljs-comment">//语法</span>
+arr.reduce(callback,[initialValue])
+</div></code></pre>
+<ul>
+<li>callback （执行数组中每个值的函数，包含四个参数）
+<ul>
+<li>previousValue （第一项的值或者上一次叠加的结果值，或者是提供的初始值  - （initialValue））</li>
+<li>currentValue （数组中当前被处理的元素）</li>
+<li>index （当前元素在数组中的索引）</li>
+<li>array （数组本身）</li>
+</ul>
+</li>
+<li>initialValue （作为第一次调用 callback 的第一个参数，可以控制返回值的格式）</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">var</span>  arr = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>];
+sum = arr.reduce(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">prev, cur, index, arr</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(prev, cur, index);   <span class="hljs-comment">//输出的是第一项的值或上一次叠加的结果，正在被处理的元素，正在被处理的元素的索引值</span>
+    <span class="hljs-keyword">return</span> prev + cur;
+})
+<span class="hljs-built_in">console</span>.log(arr, sum); <span class="hljs-comment">//输入数组本身和最后的结果</span>
+</div></code></pre>
 <h3 id="%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C">常见操作</h3>
 <table>
 <thead>
@@ -1449,6 +1533,57 @@ event.preventDefault() <span class="hljs-comment">//阻止默认事件的方法<
 </ul>
 </li>
 </ol>
+<h4 id="%E5%A6%82%E4%BD%95%E5%AE%9A%E4%BD%8D">如何定位</h4>
+<p>Chrome DevTools里的Performance面板和Memory面板可以用来定位内存问题</p>
+<p>排查内存泄漏的第一步，就是要先梳理一遍自己的代码，看一下哪部分内存的升高是合理的，哪部分内存的升高是不合理的。</p>
+<ol>
+<li>先用Performance录制
+当我们怀疑页面发生了内存泄漏的时候，可以先用Performance<strong>录制</strong>一段时间内页面的性能变化。你只需要切换到Performance面板，点击Record，然后在页面上正常操作一段时间，最后停止录制即可。</li>
+</ol>
+<p>如果录制结束后，看到内存的<strong>下限</strong>在不断升高的话，你就要注意了 —— 这里有可能发生了内存泄漏。</p>
+<p>除了内存增长曲线，<strong>Nodes</strong>（Dom节点数曲线）、<strong>Document</strong>曲线以及<strong>Listener</strong>曲线也同样值得关注，有时候它们对内存问题的定位也很有帮助。</p>
+<ol start="2">
+<li>用Memory面板来进一步定位泄漏的源头</li>
+</ol>
+<ul>
+<li>从Memory的主界面开始，点击左上角的圆点就可以记录下当前的堆内存快照（heap snapshot）了</li>
+<li>打开DevTools, 切换至Memory面板</li>
+<li>先记录一个堆内存快照</li>
+<li>在你的页面上执行可能发生泄漏的操作</li>
+<li>再记录一个堆内存快照</li>
+<li>重复执行多几遍步骤3</li>
+<li>最后记录一个堆内存快照</li>
+<li>选择最后一个堆内存快照，找到顶栏的“All objects”, 切换至”Objects allocated between snapshots 1 and 2”（也可以对2，3执行同样的操作）</li>
+</ul>
+<p>如果Shallow Size = Retained Size，说明基本没怎么泄漏。而如果Retained Size &gt; Shallow Size，就需要多加注意了。</p>
+<h3 id="%E5%A0%86%E5%86%85%E5%AD%98%E6%A0%88%E5%86%85%E5%AD%98">堆内存/栈内存</h3>
+<p><strong>栈内存</strong>：</p>
+<ul>
+<li>主要用于存储各种<strong>基本类型</strong>的变量
+<ul>
+<li>包括Boolean、Number、String、Undefined、Null，</li>
+<li>以及<strong>对象变量的指针</strong>，</li>
+<li>这时候栈内存给人的感觉就像一个线性排列的空间，每个小单元大小基本相等。</li>
+</ul>
+</li>
+<li>堆内存主要负责像对象Object这种变量类型的存储</li>
+</ul>
+<p><strong>堆内存</strong>：</p>
+<ul>
+<li>主要负责像<strong>对象Object</strong>这种变量类型的存储</li>
+</ul>
+<h5 id="const">const</h5>
+<p>当我们定义一个const对象的时候，我们说的常量其实是指针，就是const对象对应的堆内存指向是不变的，但是堆内存中的数据本身的大小或者属性是可变的。</p>
+<p>而对于const定义的基础变量而言，这个值就相当于const对象的指针，是不可变。</p>
+<p>知道了const在内存中的存储，那么const、let定义的变量不能二次定义的流程也就比较容易猜出来了，每次使用const或者let去初始化一个变量的时候，会首先遍历当前的内存栈，看看有没有重名变量，有的话就返回错误。</p>
+<h5 id="new">new</h5>
+<p>new的对象是放在堆里的，返回一个指针</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// a b相当于两个指针，指向的不同的堆内存中的对象</span>
+<span class="hljs-keyword">var</span> a = <span class="hljs-keyword">new</span> <span class="hljs-built_in">String</span>(<span class="hljs-string">'123'</span>) 
+<span class="hljs-keyword">var</span> b = <span class="hljs-keyword">new</span> <span class="hljs-built_in">String</span>(<span class="hljs-string">'123'</span>)
+<span class="hljs-built_in">console</span>.log(a==b, a===b)
+&gt;&gt;&gt; <span class="hljs-literal">false</span> <span class="hljs-literal">false</span>
+</div></code></pre>
 <h2 id="%E5%AD%98%E5%82%A8%E9%97%AE%E9%A2%98">存储问题</h2>
 <h3 id="localstoragesessionstoragecookies">localstorage/sessionstorage/cookies</h3>
 <h4 id="%E7%9B%B8%E5%90%8C%E7%82%B9">相同点</h4>
@@ -1474,6 +1609,300 @@ event.preventDefault() <span class="hljs-comment">//阻止默认事件的方法<
 <p>它们的应用场景也不同，Cookie一般用于存储登录验证信息SessionID或者token，LocalStorage常用于存储不易变动的数据，减轻服务器的压力，SessionStorage可以用来检测用户是否是刷新进入页面，如音乐播放器恢复播放进度条的功能。</p>
 </li>
 </ol>
+<h4 id="%E6%99%AE%E9%80%9A%E4%BD%BF%E7%94%A8">普通使用</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">//！！！基础变量</span>
+<span class="hljs-comment">// 当我们存基本变量时</span>
+localStorage.setItem(<span class="hljs-string">'基本变量'</span>, <span class="hljs-string">'这是一个基本变量'</span>)
+<span class="hljs-comment">// 当我们取值时</span>
+localStorage.getItem(<span class="hljs-string">'基本变量'</span>)
+<span class="hljs-comment">// 当我们删除时</span>
+localStorage.removeItem(<span class="hljs-string">'基本变量'</span>)
+
+<span class="hljs-comment">//！！！引用变量</span>
+<span class="hljs-comment">// 当我们存引用变量时</span>
+localStorage.setItem(<span class="hljs-string">'引用变量'</span>, <span class="hljs-built_in">JSON</span>.stringify(data))
+<span class="hljs-comment">// 当我们取值时</span>
+<span class="hljs-keyword">const</span> data = <span class="hljs-built_in">JSON</span>.parse(localStorage.getItem(<span class="hljs-string">'引用变量'</span>))
+<span class="hljs-comment">// 当我们删除时</span>
+localStorage.removeItem(<span class="hljs-string">'引用变量'</span>)
+
+<span class="hljs-comment">//清空</span>
+localStorage.clear()
+</div></code></pre>
+<h4 id="%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83">命名规范</h4>
+<ol>
+<li>比如我们存用户信息会使用user作为 key 来存储</li>
+<li>存储主题的时候用theme 作为 key 来存储</li>
+<li>存储令牌时使用token作为 key 来存储
+其实这是很有问题的，咱们都知道，同源的两个项目，它们的localStorage是互通的。</li>
+</ol>
+<p>我举个例子吧比如我现在有两个项目，它们在同源https://www.sunshine.com下，这两个项目都需要往localStorage中存储一个 key 为name的值，那么这就会造成两个项目的name互相顶替的现象，也就是互相污染现象：</p>
+<pre class="hljs"><code><div>项目名 + 当前环境 + 项目版本 + 缓存key
+SUNSHINE_ADMIN_DEV_2.11_NAME
+</div></code></pre>
+<h4 id="%E6%97%B6%E6%95%88%E6%80%A7">时效性</h4>
+<p>咱们都知道localStorage、sessionStorage这两个的生命周期分别是</p>
+<ul>
+<li>localStorage：除非<strong>手动清除</strong>，否则一直存在</li>
+<li>sessionStorage：生命结束于当前<strong>标签页的关闭</strong>或<strong>浏览器的关闭</strong></li>
+</ul>
+<p>设置缓存key时，将value包装成一个对象，对象中有相应的时效时段，当下一次想获取缓存值时，判断有无超时，不超时就获取value，超时就删除这个缓存
+<img src="./img/2023-01-12-16-25-11.png" alt=""></p>
+<h4 id="%E9%9A%90%E7%A7%98%E6%80%A7">隐秘性</h4>
+<p>其实这个好理解，你们想想，当咱们把咱们想缓存的东西，存在localStorage、sessionStorage中，在开发过程中，确实有利于咱们的开发，咱们想看的时候也是一目了然，点击Application就可以看到。</p>
+<p>但是，一旦产品上线了，用户也是可以看到缓存中的东西的，而咱们肯定是会想：<strong>有些东西可以让用户看到，但是有些东西我不想让你看到</strong></p>
+<p>加密很简单，直接使用crypto-js进行对数据的加密，使用这个库里的encrypt、decrypyt进行加密、解密</p>
+<h2 id="%E8%B7%A8%E5%9F%9F">跨域</h2>
+<h3 id="%E5%90%8C%E6%BA%90%E7%AD%96%E7%95%A5">同源策略</h3>
+<p><strong>同源策略</strong>限制了从<strong>同一个源加载的文档或脚本</strong>如何与<strong>来自另一个源的资源</strong>进行交互。这是一个用于<strong>隔离</strong>潜在恶意文件的重要安全机制</p>
+<p>简单来说，在一个域名地址下的网页，如果请求一个受到同源策略限制的另一个域名地址接口的时候，就会报错</p>
+<p>同源策略不仅仅是浏览器这边做了限制，在服务端也是有限制的</p>
+<blockquote>
+<p>同源： 协议、主机、端口 一致</p>
+</blockquote>
+<h3 id="jsonp">JSONP</h3>
+<h4 id="src%E5%92%8Chref%E5%B1%9E%E6%80%A7"><code>src</code>和<code>href</code>属性</h4>
+<p>HTML的标签中有一个属性是可以请求外部地址的，那就是src和href属性。可以请求外部地址的js或者css，请求cdn服务器上的公共资源，并且不会出现问题，所以根据src的这一个特性，优秀的工程师们想到一个解决跨域的办法，俗称JSONP。</p>
+<p>主要思路是生成一个<code>&lt;script&gt;</code>标签，里头src属性赋值为要请求的文件/资源</p>
+<pre class="hljs"><code><div><span class="hljs-meta">&lt;!doctype <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>JSONP<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">print</span>(<span class="hljs-params">data</span>) </span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`我叫<span class="hljs-subst">${data.name}</span>`</span>);
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`我今年<span class="hljs-subst">${data.age}</span>岁`</span>);
+      <span class="hljs-keyword">let</span> jsonpScript = <span class="hljs-built_in">document</span>.getElementsByClassName(<span class="hljs-string">'jsonpScript'</span>)[<span class="hljs-number">0</span>];
+      <span class="hljs-built_in">document</span>.body.removeChild(jsonpScript);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">jsonpRequest</span>(<span class="hljs-params">callback</span>) </span>{
+      <span class="hljs-keyword">let</span> jsonpScript = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+      jsonpScript.src = <span class="hljs-string">`http://www.zhanwuzha.com/jsonp/js/index.js?callback=<span class="hljs-subst">${callback}</span>`</span>;
+      jsonpScript.className = <span class="hljs-string">'jsonpScript'</span>;
+      <span class="hljs-built_in">document</span>.body.appendChild(jsonpScript);
+    }
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"jsonpRequest('print')"</span>&gt;</span>发个JSONP请求<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-comment">// jsonp/js/index.js</span>
+print({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'前端战五渣'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">18</span>
+  })
+
+</div></code></pre>
+<p>其实JSONP并不算真正意义上的AJAX请求，只是<strong>请求了一个js文件并且执行</strong>了，而且这种跨域方法只能进行<strong>GET请求</strong></p>
+<h3 id="cors%E8%B7%A8%E5%9F%9F%E8%B5%84%E6%BA%90%E5%85%B1%E4%BA%AB">CORS[跨域资源共享]</h3>
+<p>它允许浏览器向跨源服务器，发出 <code>XMLHttpRequest</code> 请求，从而克服了<code>AJAX</code>只能同源使用的限制。</p>
+<h4 id="%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82">简单请求</h4>
+<p>只要满足以下条件的请求，就属于简单请求</p>
+<ol>
+<li>请求方法为<strong>HEAD</strong>、<strong>GET</strong>或者<strong>POST</strong>中的一种</li>
+<li>HTTP的头信息不超过以下几种字段Accept、Accept-Language、Content-Language、Last-Event-ID以及Content-Type的值只限于application/x-www-form-urlencoded、multipart/form-data、text/plain三个</li>
+</ol>
+<p>对于简单请求来说，从浏览器发出请求的时候，浏览器会自动在请求头中添加一个字段Origin，值为发出请求网页的源地址</p>
+<p><img src="https://pic3.zhimg.com/80/v2-a30a1883fcbf07f8c7d86e9b73511186_1440w.webp" alt=""></p>
+<ul>
+<li>如果<code>Origin</code>的值<strong>不在指定</strong>的许可范围
+<ul>
+<li>服务端返回一个正常的HTTP回应。
+<ul>
+<li>这个回应的头信息没有包含<code>Access-Control-Allow-Origin</code>字段，就知道出错了，从而抛出一个错误，被<code>XMLHttpRequest</code>的<code>onerror</code>回调函数捕获。</li>
+<li>注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>如果<code>Access-Control-Allow-Origin</code>字段正好跟带过去的<code>Origin</code>的<strong>值一样</strong>，则返回对应的数据，完成一次请求。</li>
+</ul>
+<p>总的来说，CORS实现跨域的方法就是根据<strong>请求头</strong>的<code>Origin</code>值和<strong>响应头</strong>的<code>Access-Control-Request-Headers</code>和<code>Access-Control-Request-Method</code>的值进行比对，通过了就可以请求成功，没通过就请求失败。</p>
+<h4 id="%E9%9D%9E%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82">非简单请求</h4>
+<p>非简单请求是那种对服务器有特殊要求的请求，比如请求方法是<strong>PUT</strong>或<strong>DELETE</strong>，或者<code>Content-Type</code>字段的类型是<code>application/json</code>。</p>
+<h4 id="option%E8%AF%B7%E6%B1%82">option请求</h4>
+<p>在进行非简单请求之前，浏览器会在正式请求之前发送一次<strong>预检请求</strong>，这就是有时候我们会在控制台中看到的<strong>option请求</strong>，就是说，正式请求之前，浏览器会去问服务端我这个地址能不能访问你，如果可以，浏览器才会发送正式的请求，否则报错。</p>
+<h2 id="ajax">Ajax</h2>
+<p>AJAX代表异步JavaScript和XML。</p>
+<p>它是一组用于<strong>异步显示数据</strong>的相关技术。换句话说，它在不重新加载网页的情况下<strong>发送和检索数据</strong>。</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// 原生js</span>
+<span class="hljs-comment">//创建 XMLHttpRequest 对象</span>
+<span class="hljs-keyword">var</span> ajax = <span class="hljs-keyword">new</span> XMLHttpRequest();
+<span class="hljs-comment">//规定请求的类型、URL 以及是否异步处理请求。</span>
+ajax.open(<span class="hljs-string">'GET'</span>,url,<span class="hljs-literal">true</span>);
+<span class="hljs-comment">//发送信息至服务器时内容编码类型</span>
+ajax.setRequestHeader(<span class="hljs-string">"Content-type"</span>, <span class="hljs-string">"application/x-www-form-urlencoded"</span>); 
+<span class="hljs-comment">//发送请求</span>
+ajax.send(<span class="hljs-literal">null</span>);  
+<span class="hljs-comment">//接受服务器响应数据</span>
+ajax.onreadystatechange = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (obj.readyState == <span class="hljs-number">4</span> &amp;&amp; (obj.status == <span class="hljs-number">200</span> || obj.status == <span class="hljs-number">304</span>)) { 
+    }
+};
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-comment">// jQuery</span>
+$.ajax({				<span class="hljs-comment">//交互方式 $.get，$.post，$.getJSON</span>
+	<span class="hljs-attr">async</span>:				<span class="hljs-comment">//请求同步异步，默认true异步</span>
+	type:				<span class="hljs-comment">//请求类型：GET/POST				</span>
+	url:				<span class="hljs-comment">//请求的网站地址</span>
+	data:				<span class="hljs-comment">//提交的数据，参数</span>
+	contentType:		<span class="hljs-comment">//请求的MIME媒体类型：application/x-www-form-urlencoded（默认）、application/json;charset=UTF-8</span>
+	dataType:			<span class="hljs-comment">//服务器返回MIME类型：xml/html/script/json/jsonp</span>
+	success: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">data</span>)</span>{	<span class="hljs-comment">//请求成功，回调函数，data封装网站返回的数据</span>
+		<span class="hljs-built_in">console</span>.log( data );
+	},
+	<span class="hljs-attr">error</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>)</span>{		<span class="hljs-comment">//请求失败回调函数，e封装错误信息</span>
+		<span class="hljs-built_in">console</span>.log(e.status);			<span class="hljs-comment">//状态码</span>
+		<span class="hljs-built_in">console</span>.log(e.responseText);	<span class="hljs-comment">//错误信息</span>
+	}
+})
+
+</div></code></pre>
+<h3 id="xmlhttprequest%E7%9A%84%E5%B1%9E%E6%80%A7">XMLHttpRequest的属性</h3>
+<ul>
+<li><code>onReadyStateChange</code> - 只要readystate属性发生变化，就会调用它。</li>
+<li><code>readyState</code> - 表示请求的状态。</li>
+<li><code>responseText</code> - 它将响应作为文本返回。</li>
+<li><code>responseXML</code> - 它以XML格式返回响应。</li>
+<li><code>status</code> - 返回请求的状态编号。</li>
+<li><code>statusText</code> - 返回状态的详细信息。</li>
+</ul>
+<h3 id="xmlhttprequest%E7%9A%84%E9%87%8D%E8%A6%81%E6%96%B9%E6%B3%95%E6%98%AF%E4%BB%80%E4%B9%88">XMLHttpRequest的重要方法是什么？</h3>
+<ul>
+<li><code>abort()</code> - 用于取消当前请求。</li>
+<li><code>getAllResponseHeaders()</code> - 返回标题详细信息。</li>
+<li><code>getResponseHeader()</code> - 返回特定的标题详细信息。</li>
+<li><code>open()</code> - 用于打开请求。
+<ul>
+<li><code>open(method,URL)</code> - 它打开指定get或post方法和URL的请求。</li>
+<li><code>open(method,URL,async)</code> - 它与上面相同但是指定异步或不指定。</li>
+<li><code>open(method,URL,async,userName,password)</code> - 与上面相同，但指定用户名和密码。</li>
+</ul>
+</li>
+<li><code>send()</code> - 用于发送请求。
+<ul>
+<li><code>send()</code> - 它发送get请求</li>
+<li><code>send(string)</code> - 发送帖子请求。</li>
+</ul>
+</li>
+<li><code>setRequestHeader()</code> - 它添加了请求标头。</li>
+</ul>
+<h3 id="ajax%E6%9C%89%E5%93%AA%E4%BA%9B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98">AJAX有哪些安全问题？</h3>
+<ul>
+<li>AJAX源代码是可读的</li>
+<li>攻击者可以将脚本插入系统</li>
+</ul>
+<h3 id="axios">axios</h3>
+<p>Vue中封装了ajax并增强了它，在异步并发处理优于原生ajax。称为：axios（ajax input output system）</p>
+<pre class="hljs"><code><div><span class="hljs-comment">//get请求方式一：</span>
+axios({
+		<span class="hljs-comment">// 默认请求方式为get</span>
+		<span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>,
+		<span class="hljs-attr">url</span>: <span class="hljs-string">'api'</span>,
+		<span class="hljs-comment">// 传递参数</span>
+		<span class="hljs-attr">params</span>: {
+			<span class="hljs-attr">key</span>: value
+		},
+		<span class="hljs-comment">// 设置请求头信息</span>
+		<span class="hljs-attr">headers</span>: {
+			<span class="hljs-attr">key</span>: value
+		}
+		<span class="hljs-attr">responseType</span>: <span class="hljs-string">'json'</span>
+	}).then(<span class="hljs-function">(<span class="hljs-params">response</span>) =&gt;</span> {
+		<span class="hljs-comment">// 请求成功</span>
+		<span class="hljs-keyword">let</span> res = response.data;
+		<span class="hljs-built_in">console</span>.log(res);
+	}).catch(<span class="hljs-function">(<span class="hljs-params">error</span>) =&gt;</span> {
+		<span class="hljs-comment">// 请求失败，</span>
+		<span class="hljs-built_in">console</span>.log(error);
+});
+<span class="hljs-comment">//get请求方式二：</span>
+axios.get(<span class="hljs-string">"api"</span>, {
+	<span class="hljs-comment">// 传递参数</span>
+	<span class="hljs-attr">params</span>: {
+		<span class="hljs-attr">key</span>: value
+	},
+    <span class="hljs-comment">// 设置请求头信息，可以传递空值</span>
+	<span class="hljs-attr">headers</span>: {
+		<span class="hljs-attr">key</span>: value
+	}
+}).then(<span class="hljs-function">(<span class="hljs-params">response</span>) =&gt;</span> {
+	<span class="hljs-comment">// 请求成功</span>
+	<span class="hljs-keyword">let</span> res = response.data;
+	<span class="hljs-built_in">console</span>.log(res);
+}).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> {
+	<span class="hljs-comment">// 请求失败，</span>
+	<span class="hljs-built_in">console</span>.log(error);
+});
+
+<span class="hljs-comment">//post请求方式一：</span>
+<span class="hljs-comment">// 注：post请求方法有的要求参数格式为formdata格式，此时需要借助 Qs.stringify()方法将对象转换为字符串</span>
+<span class="hljs-keyword">let</span> obj = qs.stringify({
+	<span class="hljs-attr">key</span>: value
+});
+axios({
+	<span class="hljs-attr">method</span>: <span class="hljs-string">'post'</span>,
+	<span class="hljs-attr">url</span>: <span class="hljs-string">'api'</span>,
+	<span class="hljs-comment">// 传递参数</span>
+	<span class="hljs-attr">data</span>: obj,
+	<span class="hljs-comment">// 设置请求头信息</span>
+	<span class="hljs-attr">headers</span>: {
+		<span class="hljs-attr">key</span>: value
+	},
+	<span class="hljs-attr">responseType</span>: <span class="hljs-string">'json'</span>
+}).then(<span class="hljs-function">(<span class="hljs-params">response </span>)=&gt;</span> {
+	<span class="hljs-comment">// 请求成功</span>
+	<span class="hljs-keyword">let</span> res = response.data;
+	<span class="hljs-built_in">console</span>.log(res);
+}).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> {
+	<span class="hljs-comment">// 请求失败，</span>
+	<span class="hljs-built_in">console</span>.log(error);
+});
+<span class="hljs-comment">//post请求方式二：</span>
+<span class="hljs-keyword">let</span> data = {
+	<span class="hljs-attr">key</span>: value
+},
+headers = {
+	<span class="hljs-attr">USERID</span>: <span class="hljs-string">""</span>,
+	<span class="hljs-attr">TOKEN</span>: <span class="hljs-string">""</span>
+};
+<span class="hljs-comment">// 若无headers信息时，可传空对象占用参数位置</span>
+axios.post(<span class="hljs-string">"api"</span>, qs.stringify(data), {
+	headers
+}
+}).then(<span class="hljs-function">(<span class="hljs-params">response</span>) =&gt;</span> {
+	<span class="hljs-comment">// 请求成功</span>
+	<span class="hljs-keyword">let</span> res = response.data;
+	<span class="hljs-built_in">console</span>.log(res);
+}).catch(<span class="hljs-function">(<span class="hljs-params">error</span>) =&gt;</span> {
+	<span class="hljs-comment">// 请求失败，</span>
+	<span class="hljs-built_in">console</span>.log(error);
+});
+</div></code></pre>
+<ul>
+<li>post请求的时候参数通过data进行传递</li>
+<li>get请求的时候参数通过params进行传递</li>
+</ul>
+<blockquote>
+<p>axios请求头的 Content-Type 默认是 application/json，而postman默认的是 application/x-www-form-urlencoded。</p>
+</blockquote>
+<p>axios 是一个基于Promise 用于浏览器和 nodejs 的 HTTP 客户端，本质上也是对原生XHR的封装，只不过它是Promise的实现版本，符合最新的ES规范，它本身具有以下特征：
+从浏览器中创建 XMLHttpRequest</p>
+<ul>
+<li>支持 Promise API</li>
+<li>客户端支持防止CSRF
+<ul>
+<li>就是让你的每个请求都带一个从cookie中拿到的key，根据浏览器同源策略，假冒的网站是拿不到你cookie中得key的，这样，后台就可以轻松辨别出这个请求是否是用户在假冒网站上的误导输入，从而采取正确的策略。</li>
+</ul>
+</li>
+<li>提供了一些并发请求的接口（重要，方便了很多的操作）</li>
+<li>从 node.js 创建</li>
+<li>http 请求 拦截请求和响应 转换请求和响应数据 取消请求</li>
+<li>自动转换JSON数据</li>
+</ul>
 
 </body>
 </html>

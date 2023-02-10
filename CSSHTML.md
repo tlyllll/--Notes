@@ -550,6 +550,69 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
   }
 }
 ```
+## 响应式布局-@media
+```css
+@media all and (device-height:800px){ … }
+@media all and (orientation:landscape){ … }
+@media all and (device-aspect-ratio:16/10){ … }
+@media all and (min-color:1){ … }
+@media all and (monochrome:0){ … }
+@media all and (grid:0){ … }
+@media screen {}
+@media all and (min-width:xxx) and (max-width:xxx){}
+@media only screen and (min-width:xxx) and (max-width:xxx){}
+/* 这是一种最常见的写法，后面跟上限定的屏幕尺寸 */
+```
+all 用于所有设备
+- 一般all跟only都是对应在一起出现的
+
+### 媒体类型：
+- all 用于所有设备
+- print 用于打印机和打印预览
+- screen 用于电脑屏幕，平板电脑，智能手机等。
+- speech 应用于屏幕阅读器等发声设备
+
+### 媒体功能
+- aspect-ratio 定义输出设备中的页面可见区域宽度与高度的比率
+- color 定义输出设备每一组彩色原件的个数。如果不是彩色设备，则值等于0
+- color-index 定义在输出设备的彩色查询表中的条目数。如果没有使用彩色查询表，则值- 等于0
+- device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的比率。
+- device-height 定义输出设备的屏幕可见高度。
+- device-width 定义输出设备的屏幕可见宽度。
+- grid 用来查询输出设备是否使用栅格或点阵。
+- height 定义输出设备中的页面可见区域高度。
+- max-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最大比率。
+- max-color 定义输出设备每一组彩色原件的最大个数。
+- max-color-index 定义在输出设备的彩色查询表中的最大条目数。
+- max-device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最大比率。
+- max-device-height 定义输出设备的屏幕可见的最大高度。
+- max-device-width 定义输出设备的屏幕最大可见宽度。
+- max-height 定义输出设备中的页面最大可见区域高度。
+- max-monochrome 定义在一个单色框架缓冲区中每像素包含的最大单色原件个数。
+- max-resolution 定义设备的最大分辨率。
+- max-width 定义输出设备中的页面最大可见区域宽度。
+- min-aspect-ratio 定义输出设备中的页面可见区域宽度与高度的最小比率。
+- min-color 定义输出设备每一组彩色原件的最小个数。
+- min-color-index 定义在输出设备的彩色查询表中的最小条目数。
+- min-device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最小比率。
+- min-device-width 定义输出设备的屏幕最小可见宽度。
+- min-device-height 定义输出设备的屏幕的最小可见高度。
+- min-height 定义输出设备中的页面最小可见区域高度。
+- min-monochrome 定义在一个单色框架缓冲区中每像素包含的最小单色原件个数
+- min-resolution 定义设备的最小分辨率。
+- min-width 定义输出设备中的页面最小可见区域宽度。
+- monochrome 定义在一个单色框架缓冲区中每像素包含的单色原件个数。如果不是单色设- 备，则值等于0
+- orientation 定义输出设备中的页面可见区域高度是否大于或等于宽度。
+- resolution 定义设备的分辨率。如：96dpi, 300dpi, 118dpcm
+- scan 定义电视类设备的扫描工序。
+- width 定义输出设备中的页面可见区域宽度。
+
+## css模块化
+CSS Modules 指的是我们像 `import js` 一样去引入我们的 css 代码，代码中的每一个类名都是引入对象的一个属性，通过这种方式，即可在使用时明确指定所引用的 css 样式。
+
+并且 CSS Modules 在打包的时候会自动将类名转换成 `hash` 值，完全杜绝 css **类名冲突**的问题。
+
+[css模块化文章](https://juejin.cn/post/6844904034281734151#heading-2)
 # HTML
 
 ## 标签属性
@@ -628,3 +691,48 @@ meta的必需属性是content，当然并不是说meta标签里一定要有conte
 <meta name="renderer" content="webkit">
 ```
 这个meta标签的意思就是告诉浏览器，用webkit内核进行解析，当然前提是浏览器有webkit内核才可以，不然就是没有意义的啦。当然看到这个你可能会有疑问，这个renderer是从哪里冒出来的，我要怎么知道呢？这个就是在对应的浏览器的开发文档里就会有表明的。
+
+## DOM
+DOM是独于平台和语言的接口，它允许程序和脚本动态地访问和更新文档的内容、结构和样式。
+
+## BOM
+BOM 是 Browser Object Model，浏览器对象模型。
+
+DOM 是为了操作文档出现的接口，那 BOM 顾名思义其实就是为了**控制浏览器的行为**而出现的接口
+
+![](./img/2023-02-03-15-06-22.png)
+
+- Window对象包含属性：document、location、navigator、screen、history、frames
+- Document根节点包含子节点：forms、location、anchors、images、links
+
+从window.document已然可以看出，DOM的最根本的对象是BOM的window对象的子对象。
+`window.document == document`
+
+
+DOM描述了处理网页内容的方法和接口，BOM描述了与浏览器进行交互的方法和接口
+
+DOM 是为了操作文档出现的 API，DOM对象最根本的是document（实际上是window.document）。
+
+BOM 是为了操作浏览器出现的 API，BOM对象最根本的是window。
+
+![](./img/2023-02-03-15-37-09.png)
+
+![](./img/2023-02-03-15-37-24.png)
+### Q. 题目
+```javascript
+var a = 1;
+let b = 2;
+const c = 3;
+console.log(a,window.a); 	// 1  1
+console.log(b,window.b); 	// 2  undefined
+console.log(c,window.c);	// 3  undefined
+```
+#### q1. var a = 1 与 a = 1 的区别?
+1. 他们俩都是挂载在window上的
+2. 但是
+   1. var a = 1;是挂在window上的**变量**，
+   2. 而 a = 1; 是挂载在window上的**属性**；
+   3. 因此导致 a = 1 可以用delete删除，而var a = 1 不能用delete删除。
+#### q2. a,b挂在哪里呢
+通过var定义的变量是挂在windows上的
+而let和const声明的变量不会挂载到window上，它形成了一个块作用域

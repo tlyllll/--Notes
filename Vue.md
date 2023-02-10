@@ -1259,4 +1259,29 @@ this.$route.matched
 11. 触发 DOM 更新。
 12. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入。
 
+## 自定义指令
+### 全局自定义指令
+用`Vue.directive`来注册。
+```javascript
+// 注册一个全局自定义指令 `v-focus`
+Vue.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()
+  }
+
+```
+### 局部自定义指令
+通过在组件内设置directives属性
+```javascript
+directives: {
+  focus: {
+    // 指令的定义
+    inserted: function (el) {
+      el.focus()
+    }
+  }
+}
+```
 
