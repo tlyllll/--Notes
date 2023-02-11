@@ -10,6 +10,17 @@ let age : number;
 let age : number = 18; 
 ```
 # class、interface、type
+## type
+类型别名 用于给类型起一个新名字
+```typescript
+type Second = number; // 基本类型
+let timeInSecond: number = 10;
+let time: Second = 10;  // time的类型其实就是number类型
+type userOjb = {name:string} // 对象
+type getName = ()=>string  // 函数
+type data = [number,string] // 元组
+type numOrFun = Second | getName  // 联合类型
+```
 ## class
 基本写法：
 - 注意用member的话要加this
