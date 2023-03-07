@@ -105,6 +105,7 @@ function Child(gender) {
     Parent.call(this, gender) //核心
 };
 Child.prototype = new Parent();//核心
+Child.prototype.constructor = Child
 ```
 优点：
 1. 创造子类实例，可以向父类构造函数传参；
@@ -178,6 +179,7 @@ let person = {
 }
  
 let child1 = createAnother(person);
+// let child1 = Object.create(person.prototype)
 child1.hoby.push("rap");
 console.log(child1.hoby); // ['唱', '跳', 'rap']
 child1.showName(); // my name is： mjy
