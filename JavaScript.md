@@ -193,47 +193,24 @@ console.log(child2.hoby); // ['唱', '跳', 'rap']
 
 ```javascript
 //作用：让child.prototype的__proto__=Parent.prototype
-function objectCopy(obj) {
-  function Fun() { };
-  Fun.prototype = obj;
-  return new Fun();
+function Human(name) {
+    this.name = name
+    this.kingdom = 'animal'
+    this.color = ['yellow', 'white', 'brown', 'black']
 }
- 
-function inheritPrototype(child, parent) {
-  let prototype = objectCopy(parent.prototype);
-  prototype.constructor = child;
-  Child.prototype = prototype;
+function Chinese(name,age) {
+    Human.call(this, name)
+    this.age = age
+    this.color = 'yellow'
 }
- 
-function Parent(name) {
-  this.name = name;
-  this.hoby = ['唱', '跳']
+Human.prototype.getName = function () {
+    return this.name
 }
- 
-Parent.prototype.showName = function () {
-  console.log('my name is：', this.name);
+Chinese.prototype = Object.create(Human.prototype)
+Chinese.prototype.constructor = Chinese
+Chinese.prototype.getAge = function (){
+    return this.age
 }
- 
-function Child(name, age) {
-  Parent.call(this, name); //作用：可以给父类传参 但只能继承父类构造函数的属性。
-  this.age = age;
-}
- 
-inheritPrototype(Child, Parent);
-Child.prototype.showAge = function () {
-  console.log('my age is：', this.age);
-}
- 
-let child1 = new Child("mjy", 18);
-child1.showAge(); // 18
-child1.showName(); // mjy
-child1.hoby.push("rap");
-console.log(child1.hoby); // ['唱', '跳', 'rap']
- 
-let child2 = new Child("yl", 18);
-child2.showAge(); // 18
-child2.showName(); // yl
-console.log(child2.hoby); // ['唱', '跳']
 ```
 优点：
 1. 高效率只调用一次父构造函数，
@@ -403,12 +380,8 @@ Value = sign x exponent x function
       console.log(obj1.body === obj2.body);
       // false
       ```
-
-3. 使用`Object.create()`方法
-
-   1. ```javascript
-      var newObj = Object.create(oldObj)
-      ```
+3. 循环遍历
+4. lodash.cloneDeep()
 
       
 

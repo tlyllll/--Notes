@@ -34,7 +34,7 @@ Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.next
 但是当我们组件的data单纯的写成对象形式，这些实例用的是同一个构造函数，由于JavaScript的特性所导致，所有的组件实例共用了一个data，就会造成一个变了全都会变的结果。
 
 ## keep-alive
-![keep-alive文档](https://v2.cn.vuejs.org/v2/api/#keep-alive)
+[keep-alive文档](https://v2.cn.vuejs.org/v2/api/#keep-alive)
 设计有A、B、C三个页面，试想这样一个场景需求：
 
 - 离开B页面进入C页面，缓存B页面数据（keepAlive: true）
@@ -49,7 +49,7 @@ keep-alive 包裹动态组件时，会缓存不活动的组件实例，而不是
   - exclude - 字符串或正则表达式。任何名称匹配的组件都不会被缓存。
   - max - 数字。最多可以缓存多少组件实例。
 
-![keep-alive使用实例](https://zhuanlan.zhihu.com/p/372621917)
+[keep-alive使用实例](https://zhuanlan.zhihu.com/p/372621917)
 
 ## 监听
 
@@ -444,7 +444,7 @@ this.$parent 子访问父
 2. 它可以通过 v-on=“$listeners” 传入内部组件。
 简单来说：`$attrs` 与`$listeners`是两个对象，`$attrs`里存放的是父组件中绑定的非 Props 属性，`$listeners` 里存放的是父组件中绑定的非原生事件
 
-```javascript
+```HTML
     //爷组件
     <div id="app">
       <Home :msg="msg"></Home>
@@ -465,7 +465,7 @@ this.$parent 子访问父
 //
 ```
 
-```javascript
+```HTML
     //爷组件
     <div id="app">
       <Home @setVal="setVal">></Home>

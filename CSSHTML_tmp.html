@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CSSHTML.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file:///Users/linyiting/Downloads/typora-notion-theme-main/themes/enhanced/notion-light-enhanced.css" type="text/css">
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p><img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2023-02-02-16-07-45.png" alt=""></p>
+<h1 id="css">CSS</h1>
+<h2 id="%E8%A6%86%E7%9B%96%E9%97%AE%E9%A2%98">覆盖问题</h2>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"red blue"</span>&gt;</span>123<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"blue red"</span>&gt;</span>123<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.red</span> {
+    <span class="hljs-attribute">color</span>: red
+}
+
+<span class="hljs-selector-class">.blue</span> {
+    <span class="hljs-attribute">color</span>: blue
+}
+</div></code></pre>
+<p>两个都是蓝色! 和引用的顺序无关 和定义的顺序有关 后面的覆盖前面的</p>
+<h2 id="%E5%8D%95%E4%BD%8D">单位</h2>
+<h3 id="%E7%BB%9D%E5%AF%B9%E9%95%BF%E5%BA%A6%E5%8D%95%E4%BD%8D">绝对长度单位</h3>
+<ul>
+<li>px [像素] 屏幕</li>
+<li>pt [点]      打印、UI稿</li>
+</ul>
+<h3 id="%E7%9B%B8%E5%AF%B9%E9%95%BF%E5%BA%A6%E5%8D%95%E4%BD%8D">相对长度单位</h3>
+<ul>
+<li>em: 相对于当前元素或父元素的字体大小计算的。 如果当前文本没有设置字体尺寸则相对于默认的字体尺寸。即1em=16px</li>
+<li>rem: 相对于根元素的字体大小</li>
+<li>vw: 视窗宽度1%</li>
+<li>vh: 视窗高度1% 高度自适应</li>
+</ul>
+<h3 id="q%E7%99%BE%E5%88%86%E6%AF%94--%E7%9B%B8%E5%AF%B9%E4%BA%8E%E8%B0%81">Q.百分比 % 相对于谁?</h3>
+<p>百分比总是相对于<strong>父元素</strong>，无论是设置 <code>font-size</code> 或 <code>width</code> 等。如果父元素的相应属性，经浏览器计算后，仍无绝对值，那么 % 的实际效果等同于 默认值，如 height: 100%</p>
+<h2 id="%E9%A2%84%E5%A4%84%E7%90%86%E5%99%A8">预处理器</h2>
+<p>不需要考虑浏览器兼容问题，因为 CSS 预处理器最终编译和输出的仍是标准的 CSS 样式。</p>
+<p>可以在 CSS 预处理器中：使用变量、简单逻辑判断、函数等基本编程技巧。</p>
+<p>关于 CSS 预处理器：sass、less、stylus</p>
+<h2 id="%E9%80%89%E6%8B%A9%E5%99%A8">选择器</h2>
+<blockquote>
+<p>ID &gt; 类 &gt; 类型（标签） &gt; 相邻 &gt; 子代 &gt; 后代 &gt; 通配符 &gt; 属性 &gt; 伪类</p>
+</blockquote>
+<ul>
+<li>
+<p>id 选择器（#myid）</p>
+</li>
+<li>
+<p>类选择器（.myclass）</p>
+</li>
+<li>
+<p>属性选择器（a[rel=&quot;external&quot;]）</p>
+</li>
+<li>
+<p>伪类选择器（a:hover, li:nth-child）</p>
+<ul>
+<li><strong>伪类</strong>：是一个以冒号作为前缀，被添加到一个选择器末尾的关键字当你希望样式在特定状态才被呈现到指定的元素时，你可以往元素的选择器后面加上对应的伪类。
+<ul>
+<li>:active，将样式添加到<strong>被激活</strong>的元素。</li>
+<li>:focus，将样式添加到<strong>被选中</strong>的元素。</li>
+<li>:hover，当<strong>鼠标悬浮</strong>在元素上方是，向元素添加样式。</li>
+<li>:link，将特殊的样式添加到<strong>未被访问过</strong>的<strong>链接</strong>。</li>
+<li>:visited，将特殊的样式添加到<strong>被访问的链接</strong>。</li>
+<li>:first-child，将特殊的样式添加到<strong>元素的第一个子元素</strong></li>
+<li>:lang，允许创作者来定义指定的元素中<strong>使用的语言</strong>。</li>
+</ul>
+</li>
+<li><strong>伪元素</strong>： after、before ----用于创建一些不在文档树中的元素，并为其添加样式。比如说，我们可以通过 ::before 来在一个元素前添加一些文本，并为这些文本添加样式。虽然用户可以看到这些文本，但是这些文本实际不在文档树中。
+<ul>
+<li>:first-letter，将特殊的样式添加到文本的<strong>首字母</strong>。</li>
+<li>:first-line，将特殊的样式添加到文本的<strong>首行</strong>。</li>
+<li>:before，在某元素<strong>之前插入</strong>某些内容。</li>
+<li>:after，在某元素<strong>之后插入</strong>某些内容。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>标签选择器（div, h1,p）</p>
+</li>
+<li>
+<p>相邻选择器（h1 + p）</p>
+</li>
+<li>
+<p>子选择器（ul &gt; li）</p>
+</li>
+<li>
+<p>后代选择器（li a）</p>
+</li>
+<li>
+<p>通配符选择器（*）</p>
+</li>
+</ul>
+<p>!important &gt;行内样式&gt; ID 选择器「如：#header」&gt; 类选择器「如：.foo」&gt; 标签选择器「如：h1」 &gt; 通配符选择器（*）</p>
+<h2 id="%E5%B8%83%E5%B1%80">布局</h2>
+<h3 id="%E5%BC%B9%E6%80%A7%E5%B8%83%E5%B1%80flex">弹性布局(<code>flex</code>)</h3>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.box</span>{
+  <span class="hljs-attribute">display</span>: flex | inline-flex;
+}
+</div></code></pre>
+<p>设为 Flex 布局以后，子元素的float、clear和vertical-align属性将失效。</p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-16-15-34-45.png" style="zoom:80%;">
+<p>采用 Flex 布局的元素，称为 <strong>Flex 容器（flex container）</strong>，简称&quot;容器&quot;。它的所有子元素自动成为容器成员，称为 <strong>Flex 项目（flex item)</strong>，简称&quot;项目&quot;。</p>
+<p>容器默认存在两根轴：<strong>水平的主轴（main axis）<strong>和</strong>垂直的交叉轴（cross axis）</strong>。</p>
+<ul>
+<li>主轴的开始位置（与边框的交叉点）叫做main start，结束位置叫做main end；</li>
+<li>交叉轴的开始位置叫做cross start，结束位置叫做cross end。</li>
+</ul>
+<p>项目默认沿主轴排列。单个项目占据的主轴空间叫做main size，占据的交叉轴空间叫做cross size。</p>
+<h4 id="%E5%AE%B9%E5%99%A8%E7%9A%84%E5%B1%9E%E6%80%A7">容器的属性</h4>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.box</span>{
+  <span class="hljs-attribute">display</span>: flex | inline-flex;
+  <span class="hljs-attribute">flex-direction</span>: row[从左往右] | row-reverse[从右往左] | 
+                  column[从上往下] | column-reverse[从下往上]; 
+  <span class="hljs-comment">/* 如果一条轴线排不下，如何换行。 */</span>
+  <span class="hljs-attribute">flex-wrap</span>: nowrap[默认]不换行 
+            | wrap 换行，第一行在上方。 
+            | wrap-reverse 换行，第一行在下方。
+  <span class="hljs-comment">/* flex-flow属性是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap。 */</span>
+  flex-flow:  &lt;flex-direction&gt; || &lt;flex-wrap&gt;;
+  <span class="hljs-comment">/* justify-content属性定义了item在主轴上的对齐方式 */</span>
+  <span class="hljs-attribute">justify-content</span>: flex-start [默认] 左对齐| flex-end 右对齐| center 居中|
+                  | space-between 两端对齐，项目之间的间隔都相等。
+                  | space-around; 每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍。
+  <span class="hljs-comment">/* align-items属性定义项目在交叉轴上如何对齐。 */</span>
+  <span class="hljs-attribute">align-items</span>: flex-start 交叉轴的起点对齐
+              | flex-end 交叉轴的终点对齐。
+              | center 交叉轴的中点对齐。
+              | baseline 项目的第一行文字的基线对齐。
+              | stretch 如果项目未设置高度或设为auto，将占满整个容器的高度。;
+  <span class="hljs-comment">/* align-content属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。 */</span>
+  <span class="hljs-attribute">align-content</span>: flex-start 与交叉轴的起点对齐。
+                | flex-end 与交叉轴的终点对齐。
+                | center 与交叉轴的中点对齐 
+                | space-between ：与交叉轴两端对齐，轴线之间的间隔平均分布。
+                | space-around 每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍 
+                | stretch（默认值）：轴线占满整个交叉轴。;
+}
+</div></code></pre>
+<p>​																				<code>justify-content</code></p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-16-16-15-08.png" style="zoom:50%;">
+<p>​																					<code>align-items</code></p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-16-16-18-43.png" style="zoom:50%;">
+<p>​																			<code>align-content</code></p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-16-16-19-05.png" style="zoom:60%;">
+<h4 id="item%E7%9A%84%E5%B1%9E%E6%80%A7">item的属性</h4>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.item</span> {
+  <span class="hljs-comment">/* default 0 排列顺序。数值越小，排列越靠前*/</span>
+  <span class="hljs-attribute">order</span>: &lt;integer&gt;;
+
+  <span class="hljs-comment">/* 定义项目的放大比例默认为0，即如果存在剩余空间，也不放大。*/</span>
+  <span class="hljs-attribute">flex-grow</span>: &lt;number&gt;; 
+  
+  <span class="hljs-comment">/* 属性定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。 如果一个项目的flex-shrink属性为0，其他项目都为1，则空间不足时，前者不缩小。*/</span>
+  <span class="hljs-attribute">flex-shrink</span>: &lt;number&gt;; 
+
+  <span class="hljs-comment">/* flex-basis属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。 */</span>
+  <span class="hljs-comment">/* 它可以设为跟width或height属性一样的值（比如350px），则项目将占据固定空间。 */</span>
+  <span class="hljs-attribute">flex-basis</span>: &lt;length&gt; | auto; <span class="hljs-comment">/* default auto */</span>
+
+  <span class="hljs-comment">/*  flex属性flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选。 */</span>
+  <span class="hljs-attribute">flex</span>: none | [ &lt;<span class="hljs-string">'flex-grow'</span>&gt; &lt;<span class="hljs-string">'flex-shrink'</span>&gt;? || &lt;<span class="hljs-string">'flex-basis'</span>&gt; ]
+  <span class="hljs-comment">/* 该属性有两个快捷值：auto (1 1 auto) 和 none (0 0 auto)。 */</span>
+
+  <span class="hljs-comment">/* align-self属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。 */</span>
+   align-self: auto | flex-start | flex-end | center | baseline | stretch;
+}
+</div></code></pre>
+<p>​																				<code>align-self</code></p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-16-16-24-25.png" style="zoom:50%;">
+<h3 id="display">display</h3>
+<ul>
+<li>block [h1~h6、hr、p、pre、ul、ol、dl、table、div、form]
+<ul>
+<li>设置宽高✅ 独占一行✅</li>
+</ul>
+</li>
+<li>inline [span、a、br、b、strong、img、input、textarea]
+<ul>
+<li>设置宽高❌ 独占一行❌</li>
+</ul>
+</li>
+<li>inline-block [img,input,textarea,select,button,canvas,svg]
+<ul>
+<li>设置宽高✅ 独占一行❌</li>
+</ul>
+</li>
+</ul>
+<h3 id="position">position</h3>
+<ul>
+<li>fixed:
+<ul>
+<li>相对于浏览器窗口是固定的，即使窗口滚动。</li>
+<li>脱离文档流，和其他元素重叠</li>
+</ul>
+</li>
+<li>relative:
+<ul>
+<li>这个相对是相对的元素本身。</li>
+<li>它所在的行不能再出现其他元素。</li>
+<li>不设置偏移量的时候 对元素没有任何影响，</li>
+<li>设置了偏移量，则基于自身初始的位置进行偏移。</li>
+<li>可以提升层级关系</li>
+</ul>
+</li>
+<li>absolute:
+<ul>
+<li>从文档流完全删除。元素定位后生成一个块级框，而不论原来它在正常流中生成何种类型的框。</li>
+<li>元素位置相对于最近的<strong>已定位【相对绝对都可以】祖先元素</strong>， 如果元素没有已定位的祖先元素，它的位置相对于<strong>最初的包含块【可能是浏览器】</strong>。会出现覆盖的情况，可以用z-index控制覆盖的顺序。</li>
+</ul>
+</li>
+<li>sticky:
+<ul>
+<li>粘性定位可以被认为是相对定位和固定定位的混合。</li>
+<li>须指定 top right bottom 或 left 四个阈值其中之一，才可使粘性定位生效。否则其行为与相对定位相同。</li>
+<li>定位~relative, 当父容器超出视角，sticky粘粘也会不见咯</li>
+</ul>
+</li>
+<li>static:
+<ul>
+<li>默认值。没有定位，元素出现在正常的流中（忽略 top, bottom, left, right 或者 z-index 声明</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>父相对子绝对</p>
+</blockquote>
+<h3 id="float">float</h3>
+<p>float在英文中是“漂浮”的意思，它可以让元素漂浮并重新排列！
+咖啡漂浮物是一种饮料，上面漂浮着冰块，对吧？
+想象一下，这个冰 = 元素。</p>
+<p>当用吸管或勺子接触时，漂浮的冰淇淋会移动。float 属性是完全相同的概念。</p>
+<img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2022-12-09-14-00-16.png" style="zoom:50%;">
+<p><code>float: none;</code>
+<img src="./img/2022-12-09-14-02-49.png" style="zoom:30%;" /></p>
+<p><code>float: left;</code>
+<img src="./img/2022-12-09-14-04-14.png" style="zoom:30%;" /></p>
+<p><code>float: right;</code>
+<img src="./img/2022-12-09-14-04-39.png" style="zoom:30%;" /></p>
+<h4 id="%E7%89%B9%E6%80%A7">特性</h4>
+<ul>
+<li>不参与高度计算</li>
+<li>会有包裹性的特点：e.g.宽度很大（实际上其宽度为父元素的100%），但是高度只有一个p标签的高度。</li>
+<li>会自动变成block元素</li>
+</ul>
+<h4 id="%E6%B5%AE%E5%8A%A8%E5%A1%8C%E9%99%B7">浮动塌陷:</h4>
+<p>如果对div1，div2，div3都设置float: left，但是父元素div-outer没有设置宽度和高度，页面如图所示
+<img src="./img/2022-12-09-14-05-42.png" style="zoom:50%;" /></p>
+<p>因为都是float，父元素计算的高度为0</p>
+<h5 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">解决方案:</h5>
+<ol>
+<li>
+<p>clear: both</p>
+<ol>
+<li>使用伪类:after[在元素后自动加上]：
+<ol>
+<li>content，height，overflow这三个属性是为了保证该伪类不会显示出任何东西，而将其设置为block是为了让其宽度占满一行，这样浮动元素才能在其范围内，clear属性才能起作用。</li>
+</ol>
+</li>
+</ol>
+<pre class="hljs"><code><div>  &amp;<span class="hljs-selector-pseudo">:after</span>{
+    <span class="hljs-attribute">content</span>: <span class="hljs-string">''</span>
+    display: block
+    clear: both
+    height: <span class="hljs-number">0</span>
+    overflow: hidden}
+</div></code></pre>
+<ol start="2">
+<li>新增一个<code>&lt;div style=&quot;clear:both&quot;&gt;</code></li>
+</ol>
+</li>
+<li>
+<p>父元素触发<strong>BFC</strong></p>
+</li>
+</ol>
+<h3 id="%E7%9B%92%E5%AD%90%E6%A8%A1%E5%9E%8B">盒子模型</h3>
+<p>border-sizing:</p>
+<ul>
+<li>border-box[IE盒子]：
+<ul>
+<li>width/height = content+padding+border</li>
+</ul>
+</li>
+<li>content-box[标准盒子]:
+<ul>
+<li>width/height = content</li>
+</ul>
+</li>
+</ul>
+<h3 id="%E6%B0%B4%E5%B9%B3%E5%9E%82%E7%9B%B4%E5%B1%85%E4%B8%AD">水平/垂直居中</h3>
+<ol>
+<li>父相对子绝对
+这种方式通过设置各个方向的距离都是0，此时再讲margin设为auto，就可以在各个方向上居中了.缺点是需要知道子元素的宽高</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.wp</span> {
+    <span class="hljs-attribute">position</span>: relative;
+}
+<span class="hljs-selector-class">.box</span> {
+    <span class="hljs-attribute">position</span>: absolute;;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">margin</span>: auto;
+}
+</div></code></pre>
+<ol start="2">
+<li>行内元素
+把box设置为行内元素，通过text-align就可以做到水平居中，但很多同学可能不知道通过通过vertical-align也可以在垂直方向做到居中，代码如下</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-comment">/* 此处引用上面的公共代码 */</span>
+<span class="hljs-comment">/* 此处引用上面的公共代码 */</span>
+
+<span class="hljs-comment">/* 定位代码 */</span>
+<span class="hljs-selector-class">.wp</span> {
+    <span class="hljs-attribute">line-height</span>: <span class="hljs-number">300px</span>;
+    <span class="hljs-attribute">text-align</span>: center;
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0px</span>;
+}
+<span class="hljs-selector-class">.box</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">16px</span>;
+    <span class="hljs-attribute">display</span>: inline-block;
+    <span class="hljs-attribute">vertical-align</span>: middle;
+    <span class="hljs-attribute">line-height</span>: initial;
+    <span class="hljs-attribute">text-align</span>: left; <span class="hljs-comment">/* 修正文字 */</span>
+}
+</div></code></pre>
+<ol start="3">
+<li>flex</li>
+</ol>
+<pre class="hljs"><code><div>  <span class="hljs-selector-class">.wp</span> {
+    <span class="hljs-attribute">display</span>: flex;
+    <span class="hljs-attribute">justify-content</span>: center;
+    <span class="hljs-attribute">align-items</span>: center;
+  }
+``
+
+### 三栏布局【左右固定，中间自适应】
+1. 左右固定尺寸+<span class="hljs-selector-tag">float</span> 中间<span class="hljs-selector-tag">margin</span>
+```<span class="hljs-selector-tag">css</span>
+<span class="hljs-selector-class">.left</span> {
+  <span class="hljs-attribute">float</span>: left;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aqua;
+}
+<span class="hljs-selector-class">.right</span> { 
+  <span class="hljs-attribute">float</span>: right;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aquamarine;
+}
+<span class="hljs-selector-class">.mid</span> {
+  <span class="hljs-attribute">background-color</span>: cadetblue;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">margin-left</span>: <span class="hljs-number">220px</span>;
+  <span class="hljs-attribute">margin-right</span>: <span class="hljs-number">220px</span>;
+} 
+</div></code></pre>
+<p>主要内容无法最先加载 ，当主要内容过多时影响用户体验
+2. BFC布局
+我们先把左右两栏元素浮动，中间栏不做其他属性，发现中间栏默认撑满全屏，这时候我们就可以利用BFC不会和浮动元素重叠的规则，把中间元素改成一个BFC，使用overflow:hidden或者display: flex达到中间栏自适应</p>
+<pre class="hljs"><code><div> <span class="hljs-selector-class">.left</span> {
+  <span class="hljs-attribute">float</span>: left;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aqua;
+  <span class="hljs-attribute">margin-right</span>: <span class="hljs-number">20px</span>;
+   
+}
+<span class="hljs-selector-class">.right</span> { 
+  <span class="hljs-attribute">float</span>: right;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aquamarine;
+  <span class="hljs-attribute">margin-left</span>: <span class="hljs-number">20px</span>; 
+  
+}
+<span class="hljs-selector-class">.mid</span> {
+  <span class="hljs-attribute">background-color</span>: cadetblue;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">overflow</span>: hidden 
+  <span class="hljs-comment">/* display: flex */</span>
+} 
+</div></code></pre>
+<ol start="3">
+<li>position</li>
+<li>父元素使用相对定位</li>
+<li>两侧子元素使用绝对定位</li>
+<li>中间元素不做定位处理，只留出空间就好</li>
+</ol>
+<pre class="hljs"><code><div> <span class="hljs-selector-class">.container</span> {
+  <span class="hljs-attribute">position</span>: relative;
+}
+
+<span class="hljs-selector-class">.left</span> {
+  <span class="hljs-attribute">position</span>: absolute;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>; 
+  <span class="hljs-attribute">background-color</span>: aqua;
+}
+
+<span class="hljs-selector-class">.right</span> {
+  <span class="hljs-attribute">position</span>: absolute;
+  <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aquamarine;
+}
+
+<span class="hljs-selector-class">.mid</span> {
+  <span class="hljs-attribute">background-color</span>: cadetblue;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> <span class="hljs-number">220px</span>;
+}
+</div></code></pre>
+<ol start="4">
+<li>圣杯布局
+<ol>
+<li>三栏都使用float进行浮动，左右定宽，中间宽度100%</li>
+<li>使用负边距来调整让三栏位于一行，左栏设置margin-left为-100%，此时左栏位于第一行首部，然后将右栏的margin-left为其宽度的负值-200px，右栏也会移动到第一行中</li>
+<li>然后我们发现中间的元素宽度还是占满100%，所以被左右div挡住了，然后我们操作<strong>父元素</strong>给出和左右两栏相等的内边距</li>
+<li>再使用相对定位把左右两栏&quot;拽&quot;出来：通过left 、right值移动</li>
+</ol>
+</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-selector-class">.container</span> {
+  <span class="hljs-attribute">margin-left</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">margin-right</span>: <span class="hljs-number">200px</span>;
+}
+<span class="hljs-selector-class">.left</span> {
+  <span class="hljs-attribute">float</span>: left;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aqua;
+  <span class="hljs-attribute">margin-left</span>: -<span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">left</span>: -<span class="hljs-number">200px</span>;
+}
+<span class="hljs-selector-class">.mid</span> {
+  <span class="hljs-attribute">float</span>: left;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: cadetblue;
+}
+
+<span class="hljs-selector-class">.right</span> {
+  <span class="hljs-attribute">float</span>: left;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">background-color</span>: aquamarine;
+  <span class="hljs-attribute">margin-left</span>: -<span class="hljs-number">200px</span>;
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">right</span>: -<span class="hljs-number">200px</span>;
+}
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>   <span class="hljs-attr">class</span>=<span class="hljs-string">"mid"</span>&gt;</span>midmidmidmidmidmidmidmidmidmidmidmidmidmidmi dmidmidmidmidmidmidmidmidmidmidmid<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"left"</span>&gt;</span>left<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"right"</span>&gt;</span>right<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div></code></pre>
+<ol start="5">
+<li>双飞翼
+双飞翼布局前两步和圣杯布局一样，只是处理中间栏部分内容被遮挡的问题解决方案不同：
+在mian内部添加一个content，通过设置左右margin（左右两栏的宽度+间距margin）来避开遮挡<pre class="hljs"><code><div></div></code></pre>
+</li>
+</ol>
+<p>.left {
+float: left;
+width: 200px;
+height: 200px;
+background-color: aqua;
+margin-left: -100%;
+}
+.mid {
+float: left;
+width: 100%;
+}
+.midContent {
+height: 200px;
+margin-left: 220px; // 左边距+间距
+margin-right: 220px;// 右边距+间距
+background-color: cadetblue;
+}</p>
+<p>.right {
+float: left;
+height: 200px;
+width: 200px;
+background-color: aquamarine;
+margin-left: -200px;
+}</p>
+<pre class="hljs"><code><div>
+```html
+&lt;div class=&quot;container&quot;&gt;
+   &lt;div class=&quot;mid&quot;&gt;
+      &lt;div class=&quot;midContent&quot;&gt;
+        midmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmidmid
+      &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;left&quot;&gt;left&lt;/div&gt;
+  &lt;div class=&quot;right&quot;&gt;right&lt;/div&gt;
+&lt;/div&gt;
+</div></code></pre>
+<h3 id="%E4%B8%A4%E6%A0%8F%E5%B8%83%E5%B1%80%E5%B7%A6%E5%9B%BA%E5%AE%9A%E5%8F%B3%E8%87%AA%E9%80%82%E5%BA%94-todo">两栏布局【左固定，右自适应】 TODO</h3>
+<p>https://blog.csdn.net/weixin_47750287/article/details/124565230</p>
+<h3 id="%E4%B8%80%E4%BA%9B%E9%A2%98">一些题</h3>
+<p><strong>Q1. z-index什么情况下会失效？</strong></p>
+<ol>
+<li>父元素position为relative时，子元素的z-index失效。解决：父元素position改为absolute或static；</li>
+<li>元素没有设置position属性为非static属性。解决：设置该元素的position属性为relative，absolute或是fixed中的一种；</li>
+<li>元素在设置z-index的同时还设置了float浮动。解决：float去除，改为display：inline-block；</li>
+</ol>
+<h2 id="bfc%E5%9D%97%E7%BA%A7%E6%A0%BC%E5%BC%8F%E5%8C%96%E4%B8%8A%E4%B8%8B%E6%96%87">BFC块级格式化上下文</h2>
+<p>把 BFC 理解成一块独立的渲染区域，BFC 看成是元素的一种属性，当元素拥有了 BFC 属性后，这个元素就可以看做成隔离了的独立容器。</p>
+<p>BFC就是一个容器，而这个容器内的<strong>块级元素</strong>会遵循一系列规则。</p>
+<p>BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。</p>
+<h3 id="%E5%B8%83%E5%B1%80%E8%A7%84%E5%88%99">布局规则</h3>
+<ol>
+<li>内部的box会一行一个垂直放</li>
+<li>垂直方向的距离由margin决定，一个BFC内的两个相邻margin会重叠。不同BFC的margin不会重叠</li>
+<li>每个块级元素的左外缘与包含块的左边缘接触（对于从右到左格式，右边缘接触）。即使存在浮动，也会出现这种情况
+<ol>
+<li>若一个块级元素的position为fixed。那么，包含块始终都为viewport。</li>
+<li>若一个块级元素的position为absolute。那么，包含块则为离它最近的position不是static的祖先元素的padding-box 。</li>
+<li>若一个块级元素的position为static或relative。那么，包含块则为其父元素的content-box。</li>
+</ol>
+</li>
+</ol>
+<h3 id="%E7%89%B9%E6%80%A7">特性</h3>
+<ol>
+<li>BFC的区域不会与float box重叠。</li>
+<li>BFC就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。</li>
+<li>计算BFC的高度时，浮动元素也参与计算。</li>
+</ol>
+<h3 id="q-%E6%80%8E%E4%B9%88%E8%A7%A6%E5%8F%91bfc">Q: 怎么触发BFC?</h3>
+<ol>
+<li>根元素<code>&lt;html&gt;</code></li>
+<li>float不为none</li>
+<li>position为absolute或fixed</li>
+<li>display为inline-block, table-cell, table-caption, flex, inline-flex</li>
+<li>overflow不为visible</li>
+</ol>
+<h2 id="%E6%96%B0%E7%89%B9%E6%80%A7">新特性</h2>
+<h3 id="%E4%BC%AA%E7%B1%BBhas">伪类:has</h3>
+<p><code>a:has(span) // 只会匹配包含 span 子元素的 a 元素：</code></p>
+<h3 id="%E7%BA%A7%E8%81%94%E5%B1%82cascade-layers">级联层（Cascade Layers）</h3>
+<p>有时候当我们想要<strong>覆盖组件原来的样式</strong>来应用我们自定义的样式时，一般情况下我们会采用<strong>优先级更高的样式名</strong>来进行覆盖（或ID选择器或嵌套很多层），有时候又不得不应用<code>!important</code> ，这样很容易造成样式的混乱，不好管理。</p>
+<p>级联层的诞生就是为了解决上述问题，它可以让CSS样式<strong>按照我们定义好的级联顺序展示</strong>，起到控制不同样式间的优先级的作用。
+使用方法</p>
+<pre class="hljs"><code><div><span class="hljs-variable">@layer</span> A, B, C;
+
+<span class="hljs-variable">@layer</span> A {
+  <span class="hljs-selector-tag">div</span> {
+    <span class="hljs-attribute">background-color</span>: red;
+  }
+}
+
+<span class="hljs-variable">@layer</span> B {
+  <span class="hljs-selector-id">#app</span> {
+    <span class="hljs-attribute">background-color</span>: blue;
+  }
+}
+
+<span class="hljs-variable">@layer</span> C {
+  <span class="hljs-selector-tag">div</span> {
+    <span class="hljs-attribute">background-color</span>: green;
+  }
+}
+</div></code></pre>
+<h2 id="%E5%93%8D%E5%BA%94%E5%BC%8F%E5%B8%83%E5%B1%80-media">响应式布局-@media</h2>
+<pre class="hljs"><code><div><span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">device-height:</span><span class="hljs-number">800px</span>){ … }
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">orientation:</span>landscape){ … }
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">device-aspect-ratio:</span><span class="hljs-number">16</span>/<span class="hljs-number">10</span>){ … }
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">min-color:</span><span class="hljs-number">1</span>){ … }
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">monochrome:</span><span class="hljs-number">0</span>){ … }
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">grid:</span><span class="hljs-number">0</span>){ … }
+<span class="hljs-keyword">@media</span> screen {}
+<span class="hljs-keyword">@media</span> all <span class="hljs-keyword">and</span> (<span class="hljs-attribute">min-width:</span>xxx) <span class="hljs-keyword">and</span> (<span class="hljs-attribute">max-width:</span>xxx){}
+<span class="hljs-keyword">@media</span> <span class="hljs-keyword">only</span> screen <span class="hljs-keyword">and</span> (<span class="hljs-attribute">min-width:</span>xxx) <span class="hljs-keyword">and</span> (<span class="hljs-attribute">max-width:</span>xxx){}
+<span class="hljs-comment">/* 这是一种最常见的写法，后面跟上限定的屏幕尺寸 */</span>
+</div></code></pre>
+<p>all 用于所有设备</p>
+<ul>
+<li>一般all跟only都是对应在一起出现的</li>
+</ul>
+<h3 id="%E5%AA%92%E4%BD%93%E7%B1%BB%E5%9E%8B">媒体类型：</h3>
+<ul>
+<li>all 用于所有设备</li>
+<li>print 用于打印机和打印预览</li>
+<li>screen 用于电脑屏幕，平板电脑，智能手机等。</li>
+<li>speech 应用于屏幕阅读器等发声设备</li>
+</ul>
+<h3 id="%E5%AA%92%E4%BD%93%E5%8A%9F%E8%83%BD">媒体功能</h3>
+<ul>
+<li>aspect-ratio 定义输出设备中的页面可见区域宽度与高度的比率</li>
+<li>color 定义输出设备每一组彩色原件的个数。如果不是彩色设备，则值等于0</li>
+<li>color-index 定义在输出设备的彩色查询表中的条目数。如果没有使用彩色查询表，则值- 等于0</li>
+<li>device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的比率。</li>
+<li>device-height 定义输出设备的屏幕可见高度。</li>
+<li>device-width 定义输出设备的屏幕可见宽度。</li>
+<li>grid 用来查询输出设备是否使用栅格或点阵。</li>
+<li>height 定义输出设备中的页面可见区域高度。</li>
+<li>max-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最大比率。</li>
+<li>max-color 定义输出设备每一组彩色原件的最大个数。</li>
+<li>max-color-index 定义在输出设备的彩色查询表中的最大条目数。</li>
+<li>max-device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最大比率。</li>
+<li>max-device-height 定义输出设备的屏幕可见的最大高度。</li>
+<li>max-device-width 定义输出设备的屏幕最大可见宽度。</li>
+<li>max-height 定义输出设备中的页面最大可见区域高度。</li>
+<li>max-monochrome 定义在一个单色框架缓冲区中每像素包含的最大单色原件个数。</li>
+<li>max-resolution 定义设备的最大分辨率。</li>
+<li>max-width 定义输出设备中的页面最大可见区域宽度。</li>
+<li>min-aspect-ratio 定义输出设备中的页面可见区域宽度与高度的最小比率。</li>
+<li>min-color 定义输出设备每一组彩色原件的最小个数。</li>
+<li>min-color-index 定义在输出设备的彩色查询表中的最小条目数。</li>
+<li>min-device-aspect-ratio 定义输出设备的屏幕可见宽度与高度的最小比率。</li>
+<li>min-device-width 定义输出设备的屏幕最小可见宽度。</li>
+<li>min-device-height 定义输出设备的屏幕的最小可见高度。</li>
+<li>min-height 定义输出设备中的页面最小可见区域高度。</li>
+<li>min-monochrome 定义在一个单色框架缓冲区中每像素包含的最小单色原件个数</li>
+<li>min-resolution 定义设备的最小分辨率。</li>
+<li>min-width 定义输出设备中的页面最小可见区域宽度。</li>
+<li>monochrome 定义在一个单色框架缓冲区中每像素包含的单色原件个数。如果不是单色设- 备，则值等于0</li>
+<li>orientation 定义输出设备中的页面可见区域高度是否大于或等于宽度。</li>
+<li>resolution 定义设备的分辨率。如：96dpi, 300dpi, 118dpcm</li>
+<li>scan 定义电视类设备的扫描工序。</li>
+<li>width 定义输出设备中的页面可见区域宽度。</li>
+</ul>
+<h2 id="css%E6%A8%A1%E5%9D%97%E5%8C%96">css模块化</h2>
+<p>CSS Modules 指的是我们像 <code>import js</code> 一样去引入我们的 css 代码，代码中的每一个类名都是引入对象的一个属性，通过这种方式，即可在使用时明确指定所引用的 css 样式。</p>
+<p>并且 CSS Modules 在打包的时候会自动将类名转换成 <code>hash</code> 值，完全杜绝 css <strong>类名冲突</strong>的问题。</p>
+<p><a href="https://juejin.cn/post/6844904034281734151#heading-2">css模块化文章</a></p>
+<h1 id="html">HTML</h1>
+<h2 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7">标签属性</h2>
+<h3 id="href%E5%92%8Csrc">href和src</h3>
+<ul>
+<li>href [link、a]: 表示超文本引用。用来建立当前元素和文档之间的<strong>链接</strong></li>
+<li>src [img、script、iframe]: 加载资源，内容会嵌入到文档中当前标签所在的位置</li>
+</ul>
+<h3 id="img"><code>&lt;img&gt;</code></h3>
+<ul>
+<li>title: ⿏标滑动到元素上的时候显示</li>
+<li>alt: 图⽚⽆法加载时显示</li>
+</ul>
+<h2 id="%E8%8E%B7%E5%8F%96%E8%A1%A8%E5%8D%95%E5%85%83%E7%B4%A0">获取表单元素</h2>
+<ul>
+<li>根据<strong>id</strong> 获取元素
+<ul>
+<li>document.getElementById(&quot;id属性的值&quot;);</li>
+</ul>
+</li>
+<li>根据<strong>标签名字</strong>获取元素
+<ul>
+<li>document.getElementsByTagName(&quot;标签的名字&quot;);</li>
+</ul>
+</li>
+<li>根据<strong>name 属性</strong>的值获取元素
+<ul>
+<li>document.getElementsByName(&quot;name属性的值&quot;);</li>
+</ul>
+</li>
+<li>根据类<strong>样式的名字</strong>获取元素
+<ul>
+<li>document.getElementsByClassName(&quot;类样式的名字&quot;);</li>
+</ul>
+</li>
+<li>根据<strong>选择器</strong>获取元素
+<ul>
+<li>document.querySelector(&quot;选择器&quot;);</li>
+<li>document.querySelectorAll(&quot;选择器&quot;);</li>
+</ul>
+</li>
+</ul>
+<h2 id="%E8%AF%AD%E4%B9%89%E5%8C%96">语义化</h2>
+<h4 id="%E6%A6%82%E5%BF%B5">概念：</h4>
+<p>标签自己的语义及使用情况是对应一致的，这就叫语义化</p>
+<h4 id="%E5%A5%BD%E5%A4%84">好处：</h4>
+<ol>
+<li>读代码就可以快速理解网页标签的意义和网页的结构。有助于与他人的协作，便于团队开发和维护</li>
+<li>可以支持一些特殊的设备【盲人阅读、移动设备】</li>
+</ol>
+<h4 id="%E4%BE%8B%E5%AD%90">例子：</h4>
+<ol>
+<li>nav、section、aside、article</li>
+<li>header、footer</li>
+</ol>
+<h2 id="%E5%9B%9E%E6%B5%81%E9%87%8D%E7%BB%98">回流重绘</h2>
+<h3 id="%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E8%BF%87%E7%A8%8B">浏览器渲染过程</h3>
+<ol>
+<li>解析获取到的HTML，生成DOM树</li>
+<li>解析CSS，生成CSSOM树</li>
+<li>将DOM树和CSSOM树进行结合，生成渲染树（render tree）</li>
+<li>根据生成的渲染树，进行回流（Layout）,得到节点的几何信息（位置，大小）</li>
+<li>重绘（Painting）：根据渲染树以及回流得到的几何信息，得到节点的绝对像素（像素，背景色，外观等）</li>
+<li>Display将像素发送给GPU，展示在页面上。</li>
+</ol>
+<h3 id="%E5%9B%9E%E6%B5%81layout">回流【Layout】</h3>
+<p>浏览器会把获取到的HTML代码解析成一个DOM树，html中的每一个元素都是DOM树的一个节点，根节点也就是我们说的document对象。</p>
+<p>在渲染树中的一部分（或者全部）因为元素的规模尺寸、布局 、显隐等改变而需要重新构建，这就称为回流。每次页面至少会发生一次回流，就是在页面第一次渲染的时候。</p>
+<h3 id="%E9%87%8D%E7%BB%98painting">重绘【Painting】</h3>
+<p>在渲染树中的一些元素需要更新属性，而这些属性只是影响元素的外观、风格，不影响布局，就称为重绘。</p>
+<ul>
+<li>回流必定会引起重绘，重绘一定不会引起回流</li>
+<li>回流会导致页面重排，影响性能</li>
+</ul>
+<h2 id="meta">meta</h2>
+<p>标签提供关于 HTML 文档的元数据。它不会显示在页面上，但是对于机器是可读的。</p>
+<h3 id="%E5%BF%85%E9%9C%80%E5%B1%9E%E6%80%A7content">必需属性content</h3>
+<p>meta的必需属性是content，当然并不是说meta标签里一定要有content，而是当有http-equiv或name属性的时候，一定要有content属性对其进行说明。例如：</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"keywords"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"HTML,ASP,PHP,SQL"</span>&gt;</span>
+</div></code></pre>
+<p>这里面content里的属性就是对keywords进行的说明，所以呢也可以理解成一个键值对吧，就是</p>
+<pre class="hljs"><code><div>{keywords:<span class="hljs-string">"HTML,ASP,PHP,SQL"</span>}
+</div></code></pre>
+<h3 id="%E5%8F%AF%E9%80%89%E5%B1%9E%E6%80%A7">可选属性</h3>
+<h4 id="http-equiv">http-equiv</h4>
+<p>添加http头部内容，对一些自定义的，或者需要额外添加的http头部内容，需要发送到浏览器中，我们就可以是使用这个属性</p>
+<p>也可重定向</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"Refresh"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"5;url=http://blog.yangchen123h.cn"</span> /&gt;</span>
+</div></code></pre>
+<h4 id="name">name</h4>
+<p>这个属性是供浏览器进行解析，对于一些浏览器兼容性问题，name属性是最常用的，当然有个前提就是浏览器能够解析你写进去的name属性才可以，不然就是没有意义的。还是举个例子吧:</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"renderer"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"webkit"</span>&gt;</span>
+</div></code></pre>
+<p>这个meta标签的意思就是告诉浏览器，用webkit内核进行解析，当然前提是浏览器有webkit内核才可以，不然就是没有意义的啦。当然看到这个你可能会有疑问，这个renderer是从哪里冒出来的，我要怎么知道呢？这个就是在对应的浏览器的开发文档里就会有表明的。</p>
+<h2 id="dom">DOM</h2>
+<p>DOM是独于平台和语言的接口，它允许程序和脚本动态地访问和更新文档的内容、结构和样式。</p>
+<h2 id="bom">BOM</h2>
+<p>BOM 是 Browser Object Model，浏览器对象模型。</p>
+<p>DOM 是为了操作文档出现的接口，那 BOM 顾名思义其实就是为了<strong>控制浏览器的行为</strong>而出现的接口</p>
+<p><img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2023-02-03-15-06-22.png" alt=""></p>
+<ul>
+<li>Window对象包含属性：document、location、navigator、screen、history、frames</li>
+<li>Document根节点包含子节点：forms、location、anchors、images、links</li>
+</ul>
+<p>从window.document已然可以看出，DOM的最根本的对象是BOM的window对象的子对象。
+<code>window.document == document</code></p>
+<p>DOM描述了处理网页内容的方法和接口，BOM描述了与浏览器进行交互的方法和接口</p>
+<p>DOM 是为了操作文档出现的 API，DOM对象最根本的是document（实际上是window.document）。</p>
+<p>BOM 是为了操作浏览器出现的 API，BOM对象最根本的是window。</p>
+<p><img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2023-02-03-15-37-09.png" alt=""></p>
+<p><img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2023-02-03-15-37-24.png" alt=""></p>
+<h3 id="q-%E9%A2%98%E7%9B%AE">Q. 题目</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> b = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">const</span> c = <span class="hljs-number">3</span>;
+<span class="hljs-built_in">console</span>.log(a,<span class="hljs-built_in">window</span>.a); 	<span class="hljs-comment">// 1  1</span>
+<span class="hljs-built_in">console</span>.log(b,<span class="hljs-built_in">window</span>.b); 	<span class="hljs-comment">// 2  undefined</span>
+<span class="hljs-built_in">console</span>.log(c,<span class="hljs-built_in">window</span>.c);	<span class="hljs-comment">// 3  undefined</span>
+</div></code></pre>
+<h4 id="q1-var-a--1-%E4%B8%8E-a--1-%E7%9A%84%E5%8C%BA%E5%88%AB">q1. var a = 1 与 a = 1 的区别?</h4>
+<ol>
+<li>他们俩都是挂载在window上的</li>
+<li>但是
+<ol>
+<li>var a = 1;是挂在window上的<strong>变量</strong>，</li>
+<li>而 a = 1; 是挂载在window上的<strong>属性</strong>；</li>
+<li>因此导致 a = 1 可以用delete删除，而var a = 1 不能用delete删除。</li>
+</ol>
+</li>
+</ol>
+<h4 id="q2-ab%E6%8C%82%E5%9C%A8%E5%93%AA%E9%87%8C%E5%91%A2">q2. a,b挂在哪里呢</h4>
+<p>通过var定义的变量是挂在windows上的
+而let和const声明的变量不会挂载到window上，它形成了一个块作用域</p>
+<h2 id="defer-%E5%92%8C-async-%E7%9A%84%E5%8C%BA%E5%88%AB">defer 和 async 的区别</h2>
+<p><img src="file:///Users/linyiting/Desktop/Study/- Notes/img/2023-02-16-17-10-11.png" alt="">
+defer 的执行时间是在<strong>所有元素解析完成</strong>之后，DOMContentLoaded 事件触发之前。多个 defer 定义的 js 会按照它们的引入顺序执行。</p>
+<p>async 的执行时间是在<strong>当前 JS 脚本下载完成后</strong>，所以多个 async script 是执行顺序是不固定的。async只能用于加载一些独立无依赖的代码。</p>
+
+</body>
+</html>

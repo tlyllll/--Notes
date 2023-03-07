@@ -311,7 +311,7 @@ border-sizing:
       justify-content: center;
       align-items: center;
     }
-  ``
+  ```
 
 ### 三栏布局【左右固定，中间自适应】
 1. 左右固定尺寸+float 中间margin
@@ -434,7 +434,7 @@ border-sizing:
 
   ```html
   <div class="container">
-    <div   class="mid">midmidmidmidmidmidmidmidmidmidmidmidmidmidmi dmidmidmidmidmidmidmidmidmidmidmid</div>
+    <div   class="mid">mid</div>
     <div class="left">left</div>
     <div class="right">right</div>
   </div>
@@ -442,8 +442,9 @@ border-sizing:
 
 5. 双飞翼
   双飞翼布局前两步和圣杯布局一样，只是处理中间栏部分内容被遮挡的问题解决方案不同：
-  在mian内部添加一个content，通过设置左右margin（左右两栏的宽度+间距margin）来避开遮挡
-    ```css
+  在main内部添加一个content，通过设置左右margin（左右两栏的宽度+间距margin）来避开遮挡
+
+  ```css
   .left {
     float: left;
     width: 200px;
@@ -466,7 +467,7 @@ border-sizing:
     float: left;
     height: 200px;
     width: 200px;
-    background-color: aquamarine;
+    background-color: aquama rine;
     margin-left: -200px;
   }
   ```
@@ -641,6 +642,15 @@ CSS Modules 指的是我们像 `import js` 一样去引入我们的 css 代码�
   - document.querySelector("选择器");
   - document.querySelectorAll("选择器");
 
+## 语义化
+#### 概念： 
+标签自己的语义及使用情况是对应一致的，这就叫语义化
+#### 好处：
+1. 读代码就可以快速理解网页标签的意义和网页的结构。有助于与他人的协作，便于团队开发和维护
+2. 可以支持一些特殊的设备【盲人阅读、移动设备】
+#### 例子：
+1. nav、section、aside、article
+2. header、footer
 ## 回流重绘
 
 ### 浏览器渲染过程
@@ -736,3 +746,10 @@ console.log(c,window.c);	// 3  undefined
 #### q2. a,b挂在哪里呢
 通过var定义的变量是挂在windows上的
 而let和const声明的变量不会挂载到window上，它形成了一个块作用域
+
+## defer 和 async 的区别
+![](./img/2023-02-16-17-10-11.png)
+defer 的执行时间是在**所有元素解析完成**之后，DOMContentLoaded 事件触发之前。多个 defer 定义的 js 会按照它们的引入顺序执行。
+
+async 的执行时间是在**当前 JS 脚本下载完成后**，所以多个 async script 是执行顺序是不固定的。async只能用于加载一些独立无依赖的代码。
+

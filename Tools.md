@@ -434,3 +434,133 @@ git rebase master
 
 需要权衡其「安全性」和「可追溯性」
 - rebase 会丢失合并提交的上下文， 你也就无法看到上游更改是何时合并到 feature 中的。
+
+# Vite
+# Babel
+Babel是一个工具集，主要用于将ES6版本的JavaScript代码转为ES5等**向后兼容**的JS代码，从而可以运行在低版本浏览器或其它环境中。
+
+Babel依赖Node.js
+
+我们提到Babel版本的时候，通常是指@babel/core这个Babel核心包的版本。
+
+- Babel**7**的npm包都是放在babel域下的，即在安装npm包的时候，我们是安装@babel/这种方式，例如@babel/cli、@babel/core等。
+- 而在Babel**6**，我们安装的包名是babel-cli，babel-core等。
+  
+## polyfill
+- 从babel7.4版本开始，Babel官方已经不推荐再使用@babel/polyfill，这也包括官方的polyfill.js库文件。@babel/polyfill本身其实就是两个npm包的集合：core-js与regenerator-runtime。
+- 因此从2019年年中开始，我们的新项目都应该使用core-js和regenerator-runtime这两个包。
+- 这两种方法，都是把两个npm包**全部**都引入到了我们的前端**打包后的文件**里了，对于部分引入的方法，我们将在后面两节进行讲解。
+- 提到polyfill这个词，一般就是指我们开发过程需要对环境的缺失API特性提供支持。
+
+### 4. 在前端工程的入口文件里引入core-js/stable与regenerator-runtime/runtime
+该方法在分类上属于使用未构建的需要安装npm包@babel/polyfill的组合子包的一类，我们仍以目前业界最为流行的webpack构建工具为例，讲述该方法。后续默认是使用webpack。
+
+该方法需要我们单独安装单独安装`core-js`与`regenerator-runtime`这两个**npm包**，这种方式`core-js`是默认是`3.x.x`版本。
+
+需要注意的是，我们使用该方法的时候，不能再安装@babel/polyfill了。因为@babel/polyfill在安装的时候，会自动把core-js与regenerator-runtime这两个依赖安装上了，而@babel/polyfill使用的core-js已经锁死为2.x.x版本了。core-js的2.x.x版本里并没有stable文件目录，所以安装@babel/polyfill后再引入core-js/stable会报错。
+
+```js
+  import "core-js/stable";
+  import "regenerator-runtime/runtime";
+```
+```
+ npm install --save core-js regenerator-runtime
+```
+### 7. 在前端工程构建工具的配置文件入口里引入core-js/stable regenerator-runtime/runtime
+
+webpack.config.js的entry项数组的前两项改为core-js/stable和regenerator-runtime/runtime。
+
+```js
+const path = require('path');
+module.exports = {
+  entry: ['core-js/stable', 'regenerator-runtime/runtime', './a.js'],
+  output: {
+    filename: 'b.js',
+    path: path.resolve(__dirname, '')
+  },
+  mode: 'development'
+};
+```
+
+## @babel/preset-env
+@babel/preset-env是整个Babel大家族最重要的一个preset。不夸张地说，所有配置项仅需要它自己就可以完成现代JS工程所需要的所有转码要求。
+
+@babel/preset-env的参数项，数量有10多个，但大部分我们要么用不到，要么已经或将要弃用。这里建议大家掌握重点的几个参数项，有的放矢。
+
+重点要学习的参数项有targets、useBuiltIns、modules和corejs这四个
+
+对于preset，当我们不需要对其设置参数的时候，其写法是只需要把该preset的名字放入presets对于的数组里即可，例如
+```js
+module.exports = {
+  presets: ["@babel/env"],//@babel/env是@babel/preset-env的简写。
+  plugins: []
+}
+```
+- 如果需要对某个preset**设置参数**，应该再包裹一层数组
+  1. 第一项是该preset字符串，
+  2. 第二项是该preset的参数对象。
+- 如果该preset没有参数需要设置，则数组第二项可以是空对象或者不写第二项。以下几种写法是等价的：
+
+```js
+module.exports = {
+  presets: ["@babel/env"],
+  plugins: []
+}
+
+module.exports = {
+  presets: [["@babel/env", {}]],
+  plugins: []
+}
+
+module.exports = {
+  presets: [["@babel/env"]],
+  plugins: []
+}
+```
+
+我们的Babel也可以使用browserslist，如果你使用了@babel/preset-env这个预设，此时Babel就会读取browserslist的配置。
+
+如果我们的@babel/preset-env不设置任何参数，Babel就会完全根据browserslist的配置来做语法转换。如果没有browserslist，那么Babel就会把所有ES6的语法转换成ES5版本。
+
+## @babel/plugin-transform-runtime
+@babel/plugin-transform-runtime有三大作用：
+
+1. 自动移除语法转换后内联的辅助函数（inline Babel helpers），使用@babel/runtime/helpers里的辅助函数来替代；
+
+2. 当代码里使用了core-js的API，自动引入@babel/runtime-corejs3/core-js-stable/，以此来替代全局引入的core-js/stable;
+
+3. 当代码里使用了Generator/async函数，自动引入@babel/runtime/regenerator，以此来替代全局引入的regenerator-runtime/runtime
+
+```js
+  {
+    "plugins": [
+      "@babel/plugin-transform-runtime"
+    ]
+  }
+
+    // 是上方的默认值
+  { 
+    "plugins": [
+      [
+        "@babel/plugin-transform-runtime",
+        {
+          "helpers": true, //设置是否要自动引入辅助函数包
+          "corejs": false, //前端业务项目里，我们一般对corejs取false，即不对Promise这一类的API进行转换。而在开发JS库的时候设置为2或3
+          "regenerator": true,
+          "useESModules": false,//是否使用ES6的模块化用法.用webpack一类的打包工具的时候，我们可以设置为true，以便做静态分析。
+          "absoluteRuntime": false, //用来自定义@babel/plugin-transform-runtime引入@babel/runtime/模块的路径规则
+          "version": "7.0.0-beta.0"
+        }
+      ]
+    ]
+  }
+```
+
+1.要使用@babel/plugin-transform-runtime插件，其实只有一个npm包是必须要装的，那就是它自己@babel/plugin-transform-runtime。
+对于@babel/runtime及其进化版@babel/runtime-corejs2、@babel/runtime-corejs3，我们只需要根据自己的需要安装一个。
+
+如果你不需要对core-js做API转换，那就安装@babel/runtime并把corejs配置项设置为false即可。
+
+如果你需要用core-js2做API转换，那就安装@babel/runtime-corejs2并把corejs配置项设置为2即可。
+
+如果你需要用core-js3做API转换，那就安装@babel/runtime-corejs3并把corejs配置项设置为3即可。

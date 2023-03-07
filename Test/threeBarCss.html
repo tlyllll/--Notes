@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<body>
+    <h1>三栏布局</h1>
+    <h3>1. 浮动+margin</h3>
+    <h5>结构：left-> right -> mid</h5>
+    <div class="container">
+        <div class="left method1-left">
+            <code>
+                .method1-left { <br>
+                    &emsp;float: left;<br>
+                }<br>
+            </code> 
+        </div>
+        <div class="right  method1-right">
+            <code>
+                .method1-right {<br>
+                    &emsp;float: right;<br>
+                }<br>
+            </code><br>
+        </div>
+        <div class="mid method1-mid">
+            <code>
+                .method1-mid {<br>
+                    &emsp;margin-left: 205px;<br>
+                    &emsp;margin-right: 155px;<br>
+                }<br>
+            </code><br>
+            注意！：当“非float的元素”和“float的元素”在一起的时候,如果非float元素在先,那么float的元素将受到排斥。<br>
+            所以mid div要放在最下面
+        </div>
+    </div>
+    <h3>2. 浮动+BFC</h3>
+    <h5>结构：left-> right -> mid</h5>
+
+    <div class="container">
+        <div class="left method1-left">
+            <code>
+                .method2-left { <br>
+                    &emsp;float: left;<br>
+                }<br>
+            </code> 
+        </div>
+        <div class="right method2-right">
+            <code>
+                .method2-right { <br>
+                    &emsp;float: right;<br>
+                }<br>
+            </code> <br>
+            可以发现 有margin但因为BFC折叠了
+        </div>
+        <div class="mid method2-mid">
+            <code>
+                .method1-mid {<br>
+                    &emsp;overflow: hidden;<br>
+                }<br>
+            </code><br>
+            注意！：同上，当“非float的元素”和“float的元素”在一起的时候,如果非float元素在先,那么float的元素将受到排斥。<br>
+            所以mid div要放在最下面
+        </div>
+    </div>
+    <h3>3. flex</h3>
+    <h5>结构：left-> mid -> right</h5>
+
+    <div class="container method3-container">
+        <div class="left">
+            <code>
+                .method3-container { <br>
+                    &emsp;display: flex;<br>
+                }<br>
+                .method3-left {}
+            </code> 
+        </div>
+        <div class="mid method3-mid">
+            <code>
+                .method3-mid { <br>
+                    &emsp;flex: 1;<br>
+                }<br>
+            </code> 
+        </div>
+        <div class="right">
+            <code>
+                .method3-right { }<br>
+            </code> 
+        </div>
+    </div>
+    <h3>4. 父相子绝</h3>
+    <h5>结构：left-> right -> mid</h5>
+
+    <div class="container method4-container">
+        <div class="left method4-left">
+            <code>
+                .method4-container {<br>
+                    &emsp;position: relative;<br>
+                }<br>
+                .method4-left {<br>
+                    &emsp;position: absolute;<br>
+                    &emsp;left: 0;<br>
+                }<br>
+            </code>
+        </div>
+        <div class="right method4-right">
+            <code>
+                .method4-right {<br>
+                    &emsp;position: absolute;<br>
+                    &emsp;right: 0;<br>
+                }
+            </code><br>
+            
+        </div>
+        <div class="mid method4-mid">
+            <code>
+                .method4-mid {<br>
+                    &emsp;margin: 0 155px 0 205px;<br>
+                }
+            </code><br>
+            注意！：当“非float的元素”和“float的元素”在一起的时候,如果非float元素在先,那么float的元素将受到排斥。<br>
+            所以mid div要放在最下面
+        </div>
+    </div>
+    <h3>5. 圣杯【三栏都使用float】</h3>
+    <h5>结构：mid -> left-> right </h5>
+
+    <div class="container">
+        <div class="sub-container">
+            <div class="mid method5-mid">
+                <code>
+                    .sub-container { <br>
+                        &emsp;margin-left: left;<br>
+                        &emsp;width: 100%;<br>
+                    }<br>
+                    .method5-mid { <br>
+                        &emsp;float: left;<br>
+                        &emsp;width: 100%;<br>
+                    }<br>
+                </code> 
+                <br>
+            注意！：mid div要放在最上面
+            贼麻烦算了吧
+            </div>
+            <div class="left method5-left">
+                <code>
+                    .method5-left { <br>
+                        &emsp;float: left;<br>
+                        &emsp;margin-left: -100%;<br>
+                        &emsp;left: -205px;<br>
+                        &emsp;position: relative;<br>
+                    }<br>
+                </code> 
+            </div>
+            <div class="right method5-right">
+                <code>
+                    .method5-right { <br>
+                        &emsp;float: left;<br>
+                        &emsp;margin-left: -155px;<br>
+                        &emsp;right: -150px;<br>
+                        &emsp;position: relative;<br>
+                    }<br>
+                </code> 
+            </div>
+            </div>
+    </div>
+    <h3>6. 双飞翼</h3>
+    <h5>结构：mid -> left-> right </h5>
+
+    <div class="container">
+        <div class="mid method6-mid">
+            <div class="mid-content">
+                <code>
+                    .method6-mid {<br>
+                        &emsp;float: left;<br>
+                        &emsp;width: 100%;<br>
+                    }<br>
+                    .mid-content {<br>
+                        &emsp;margin-left: 200px;<br>
+                        &emsp;margin-right: 150px;<br>
+                        &emsp;height: 100%;<br>
+                    }<br>
+                </code> 
+            </div>
+        </div>
+        <div class="left method6-left">
+            <code>
+                .method6-left {
+                <br>    &emsp;float: left;
+                <br>    &emsp;margin-left: -100%;
+                <br>}
+            </code> 
+        </div>
+        <div class="right method6-right">
+            <code>
+                .method6-right {
+                <br>    &emsp;float: left;
+                <br>    &emsp;margin-left: -155px;
+                <br>}
+            </code> 
+        </div>
+    </div>
+</body>
+<style>
+.left {
+    background-color: rgb(211, 239, 239);
+    width: 200px;
+    height: 300px;
+    border-radius: 10px;
+    margin: 5px;
+}
+.right {
+    background-color: rgb(236, 218, 232);
+    border-radius: 10px;
+    height: 300px;
+    margin: 5px;
+    width: 150px;
+}
+.mid {
+    background-color: rgb(255, 252, 235);
+    border-radius: 10px;
+    height: 300px;
+    margin: 5px;
+}
+.container {
+    background-color: rgb(0, 0, 0);
+    height: 300px;
+    overflow: hidden;
+    margin: 10px;
+}
+.method3-container {
+    display: flex;
+}
+.method1-left {
+    float: left;
+}
+.method1-right {
+    float: right;
+}
+.method1-mid {
+    margin-left: 205px;
+    margin-right: 155px;
+}
+.method2-right {
+    float: right;
+}
+.method2-mid {
+    overflow: hidden;
+}
+.method3-mid {
+    flex: 1;
+}
+.method4-container {
+    position: relative;
+}
+.method4-left {
+    position: absolute;
+    left: 0;
+}
+.method4-right {
+    position: absolute;
+    right: 0;
+}
+.method4-mid {
+    margin: 5px 155px 5px 205px;
+}
+.method5-left {
+    float: left;
+    margin-left: -100%;
+    left: -205px;
+    position: relative;
+}
+.method5-mid {
+    float: left;
+    width: 100%;
+}
+.method5-right {
+    float: left;
+    margin-left: -155px;
+    position: relative;
+    right: -150px;
+}
+.sub-container {
+    margin-left: 200px;
+    margin-right: 150px;
+}
+.method6-left {
+    float: left;
+    margin-left: -100%;
+}
+.method6-mid {
+    float: left;
+    width: 100%;
+}
+.method6-right {
+    float: left;
+    margin-left: -155px;
+}
+.mid-content {
+    margin-left: 200px;
+    margin-right: 150px;
+    background-color: rgb(255, 201, 201);
+    height: 100%;
+}
+
+</style>
